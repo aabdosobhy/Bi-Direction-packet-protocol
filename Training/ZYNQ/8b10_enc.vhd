@@ -276,4 +276,3 @@ begin
 	end process ENC3B4B ;
 				
 end behavioral;
-
