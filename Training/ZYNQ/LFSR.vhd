@@ -3,7 +3,7 @@ library ieee;
 
 entity lfsr is
     generic(
-        size := integer 8
+        size : integer := 8
         );
     port (
         clk : in std_logic;
@@ -28,7 +28,7 @@ architecture rtl of lfsr is
         ); 
     end component;
 
-    signal lfsr_I : std_logic;
+    signal lfsr_I : std_logic_vector(7 downto 0);
     signal lfsr_O : std_logic_vector(7 downto 0);
 begin
     lfsr_reg : nRegister 
@@ -40,7 +40,7 @@ begin
             rst => rst,
             d => lfsr_I,
             q => lfsr_O
-        );
+        ); 
     
     process (clk)
     begin

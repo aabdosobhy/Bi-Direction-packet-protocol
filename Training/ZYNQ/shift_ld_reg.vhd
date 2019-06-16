@@ -14,7 +14,7 @@ entity sh_ld_reg is
 		); 
 end sh_ld_reg;
 
-architecture rtl of nRegister is
+architecture rtl of sh_ld_reg is
 	component nRegister is
         generic(
             SIZE : integer := 8
@@ -50,7 +50,7 @@ begin
 		elsif rising_edge(clk) and enb = '1'  then
 			ld_word <= din_ld & sh_word(1);
 		elsif rising_edge(clk) and enb = '0'  then
-			ld_word <= 0 & sh_word(SIZE -1 downto 1);
+			ld_word <= '0' & sh_word(SIZE -1 downto 1);
 		end if;
 	end process;
 	sh_O <= sh_word(0);

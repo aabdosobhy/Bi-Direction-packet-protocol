@@ -14,7 +14,7 @@ architecture PRNG7542 of PRNG is
 
     component lfsr is
             generic(
-                size := integer 8
+                size : integer := 8
                 );
             port (
                 clk : in std_logic;
@@ -26,7 +26,7 @@ architecture PRNG7542 of PRNG is
     end component;
 
     signal lfsr_I : std_logic;
-    signal lfsr_O : std_logic_vector(size -1 downto 0);
+    signal lfsr_O : std_logic_vector(7 downto 0);
     signal feed_1 : std_logic;
     signal feed_2 : std_logic;
     signal feed_3 : std_logic;
@@ -39,8 +39,8 @@ begin
             clk => clk,
             enb => enb,
             rst => rst,
-            d => lfsr_I,
-            q => lfsr_O
+            LSin => lfsr_I,
+            LSout => lfsr_O
         );
     
     feed_1 <= lfsr_O(0) xnor lfsr_O(2);

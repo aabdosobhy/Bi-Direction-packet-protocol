@@ -23,22 +23,9 @@ architecture rtl of train is
         ); 
     end component;
     
-    component sh_rg is
-        generic(
-            size := integer 8
-            );
-        port (
-            clk : in std_logic;
-            rst : in std_logic;
-            enb : in std_logic;
-            LSin : in std_logic;
-            LSout : out std_logic_vector(size -1 downto 0)
-        );
-    end component;
-    
     component enc_8b10b is	
         port(
-            RESET : in std_logic ;		-- Global asynchronous reset (active high) 
+            RESET : in std_logic;		-- Global asynchronous reset (active high) 
             SBYTECLK : in std_logic ;	-- Master synchronous send byte clock
             KI : in std_logic ;			-- Control (K) input(active high)
             AI, BI, CI, DI, EI, FI, GI, HI : in std_logic ;	-- Unencoded input data
@@ -54,8 +41,8 @@ architecture rtl of train is
             clk : in std_logic;		-- clock
             enb : in std_logic;		-- enable write
             rst : in std_logic;		-- reset
-            din_ld : in std_logic_vector(SIZE -2 downto 0);	-- data to register
-            sh_O : out std_logic
+            din_ld : in std_logic_vector(SIZE -2 downto 0);	-- load new data to shift
+            sh_O : out std_logic    -- O/p LSB
             ); 
     end component;
 
@@ -82,8 +69,7 @@ begin
     EI => enc_8bit(4),
     FI => enc_8bit(5),
     GI => enc_8bit(6),
-    HI => enc_8bit(7),
-    
+    HI => enc_8bit(7),  
     JO => enc_10bit(9), 
     HO => enc_10bit(8), 
     GO => enc_10bit(7), 
@@ -96,7 +82,7 @@ begin
     AO => enc_10bit(0)
     );
 
-    count : work.sh_rg(sh_Count) 
+    count_r : entity work.sh_rg(sh_Count) 
         generic map(
             size => 10)
         port map(
@@ -107,7 +93,7 @@ begin
             LSout => count
         );
     
-    word_8b : work.sh_rg(sh_rg_A)
+    word_8b_r : entity work.sh_rg(sh_rg_A)
         generic map(
             size => 10
             )
@@ -119,8 +105,7 @@ begin
             LSout => enc_8bit
         );
     
-
-    PRNG_R : work.PRNG(PRNG7542)
+    PRNG_R : entity work.PRNG(PRNG7542)
         port map(
             clk => clk,
             rst => rst,
@@ -135,26 +120,13 @@ begin
             clk => clk,
             enb => count(9),
             rst => rst,
-            din_ld => enc_10bit
+            din_ld => enc_10bit,
             sh_O => lvds_O
             ); 
 
-    process (clk)
-    begin
-        
-        if rising_edge(clk)  then 
-            if enb = '1' and rst = '1' then 
-                sh_rg_I <= (others => '0');
-            elsif enb = '1' then 
-                sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
-            end if;
-        
-        end if;
-    end process;
     not_clk <= not clk; 
     en_shift <= not (count(1) or count(0));
-
     enc_10bit <= enc_10bit(9) & enc_10bit(8) & enc_10bit(7) & enc_10bit(6) & enc_10bit(5) & enc_10bit(4) 
-        z& enc_10bit(3) & enc_10bit(2) & enc_10bit(1) & enc_10bit(0);
+        & enc_10bit(3) & enc_10bit(2) & enc_10bit(1) & enc_10bit(0);
 
 end rtl;

@@ -3,14 +3,14 @@ library ieee;
 
 entity sh_rg is
     generic(
-        size := integer 8
+        SIZE : integer := 8
         );
     port (
         clk : in std_logic;
         rst : in std_logic;
         enb : in std_logic;
         LSin : in std_logic;
-        LSout : out std_logic_vector(size -1 downto 0)
+        LSout : out std_logic_vector(SIZE -1 downto 0)
     );
     end sh_rg; 
     
@@ -28,13 +28,13 @@ architecture sh_rg_A of sh_rg is
         ); 
     end component;
 
-    signal sh_rg_I : std_logic;
-    signal Sh_rg_O : std_logic_vector(7 downto 0);
+    signal sh_rg_I : std_logic_vector(SIZE -1 downto 0);
+    signal Sh_rg_O : std_logic_vector(SIZE -1 downto 0);
 
 begin
     shift_reg : nRegister 
         generic map(
-            SIZE => size -1)
+            SIZE => SIZE)
         port map(
             clk => clk,
             enb => '1',
@@ -44,10 +44,9 @@ begin
         );
     
     process (clk)
-    begin
-        
+    begin       
         if rising_edge(clk)  then 
-            if enb = '1' and rst = '1' then 
+            if rst = '1' then 
                 sh_rg_I <= (others => '0');
             elsif enb = '1' then 
                 sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
@@ -72,13 +71,13 @@ architecture sh_Count of sh_rg is
         ); 
     end component;
 
-    signal sh_rg_I : std_logic;
-    signal Sh_rg_O : std_logic_vector(7 downto 0);
+    signal sh_rg_I : std_logic_vector(SIZE -1 downto 0);
+    signal Sh_rg_O : std_logic_vector(SIZE -1 downto 0);
 
 begin
     shift_reg : nRegister 
         generic map(
-            SIZE => size -1)
+            SIZE => SIZE)
         port map(
             clk => clk,
             enb => '1',
@@ -91,8 +90,8 @@ begin
     begin
         
         if rising_edge(clk)  then 
-            if enb = '1' and rst = '1' then 
-                sh_rg_I <= '1' & (others => '0');
+            if rst = '1' then 
+                sh_rg_I <= (SIZE -1 => '1' , others => '0');
             elsif enb = '1' then 
                 sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
             end if;
