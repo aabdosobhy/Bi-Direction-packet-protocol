@@ -2,15 +2,11 @@
     use ieee.std_logic_1164.all;
 
 entity PRNG is
-    generic(
-        size := integer 8
-        );
     port (
         clk : in std_logic;
         rst : in std_logic;
         enb : in std_logic;
-        LSin : in std_logic;
-        LSout : out std_logic
+        PRNG_O : out std_logic
     );
     end PRNG; 
     
@@ -38,7 +34,7 @@ architecture PRNG7542 of PRNG is
 begin
     lfsr_reg : lfsr 
         generic map (
-            SIZE => size -1)
+            SIZE => 8)
         port map (
             clk => clk,
             enb => enb,

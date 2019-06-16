@@ -30,7 +30,6 @@ architecture rtl of lfsr is
 
     signal lfsr_I : std_logic;
     signal lfsr_O : std_logic_vector(7 downto 0);
-    signal 
 begin
     lfsr_reg : nRegister 
         generic map (
