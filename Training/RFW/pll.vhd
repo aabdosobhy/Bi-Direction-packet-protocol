@@ -15,5 +15,4 @@ end pll;
 architecture rtl of pll is
 
 
-
 end rtl;

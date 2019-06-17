@@ -33,11 +33,11 @@ architecture rtl of lfsr is
 begin
     lfsr_reg : nRegister 
         generic map (
-            SIZE => size )
+            SIZE => size -1)
         port map (
             clk => clk,
             enb => '1',
-            rst => '0',
+            rst => rst,
             d => lfsr_I,
             q => lfsr_O
         ); 
@@ -46,7 +46,7 @@ begin
     begin
         
         if rising_edge(clk)  then 
-            if rst = '1' then 
+            if enb = '1' and rst = '1' then 
                 lfsr_I <= "01001110";       -- Seed no.
             elsif enb = '1' then 
                 lfsr_I <= LSin & lfsr_O(7 downto 1);

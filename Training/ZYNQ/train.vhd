@@ -95,7 +95,7 @@ begin
     
     word_8b_r : entity work.sh_rg(sh_rg_A)
         generic map(
-            size => 10
+            size => 8
             )
         port map(
             clk => not_clk,
@@ -128,5 +128,5 @@ begin
     en_shift <= not (count(1) or count(0));
     enc_10bit <= enc_10bit(9) & enc_10bit(8) & enc_10bit(7) & enc_10bit(6) & enc_10bit(5) & enc_10bit(4) 
         & enc_10bit(3) & enc_10bit(2) & enc_10bit(1) & enc_10bit(0);
-
+    loop_cnt <= count(0);
 end rtl;
