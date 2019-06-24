@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 entity PRNG is
     Generic (
-        SEED : std_logic_vector := "01001110"
+        SEED : std_logic_vector := "11100111"
     );
     port (
         clk : in std_logic;
@@ -15,7 +15,7 @@ entity PRNG is
     
 architecture PRNG7542 of PRNG is
 
-	signal feed : std_logic;
+	signal feed1, feed2, feed : std_logic;
     signal lfsr : std_logic_vector(7 downto 0) := SEED;
     
 begin
@@ -24,12 +24,13 @@ begin
     begin
         if rst = '1' then
             lfsr <= SEED;
-        elsif rst = '0' and rising_edge(clk) then
+        elsif rst = '0' and rising_edge(clk) and enb = '1' then
             lfsr <= feed & lfsr(7 downto 1);
         end if;
     end process;
-
-    feed <= lfsr(0) xnor lfsr(2) xnor lfsr(3) xnor lfsr(5);
+	feed1 <= lfsr(0) xor lfsr(2);
+	feed2 <= feed1 xor lfsr(3);
+    feed <= feed2 xor lfsr(5);
     PRNG_O <= lfsr(0);
 
 end PRNG7542;
