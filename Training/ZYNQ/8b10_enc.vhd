@@ -75,12 +75,12 @@ begin
 
 	-- PROCESS: SYNCRST; Synchronize and delay RESET one clock for startup
 
-	SYNCRST: process (RESET, XLRESET, SBYTECLK)
+	SYNCRST: process (SBYTECLK)
 	begin
-		if SBYTECLK'event and SBYTECLK = '1' then
+		if rising_edge(SBYTECLK) then
 			XLRESET <= RESET ;
-		elsif SBYTECLK'event and SBYTECLK = '0' then
-			LRESET <= XLRESET ;
+		--else 
+			--LRESET <= XLRESET ;
 		end if ;
 	end process SYNCRST ;
 

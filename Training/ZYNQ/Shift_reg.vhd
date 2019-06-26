@@ -93,7 +93,7 @@ begin
             if rst = '1' then 
                 sh_rg_I <= (SIZE -1 => '1' , others => '0');
             elsif enb = '1' then 
-                sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
+                sh_rg_I <= LSin & Sh_rg_O(SIZE -1 downto 1);
             end if;
         
         end if;
