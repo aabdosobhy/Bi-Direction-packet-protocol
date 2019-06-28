@@ -71,7 +71,7 @@ begin
 
     pll_inst : pll 
         port map(
-            CLKI => sdataIn;
+            CLKI => sdataIn,
             CLKOP => clk_rec
         );
 
@@ -150,7 +150,7 @@ begin
                 when 0 =>
                     reg4W_10W(39 downto 32) <= pdata2mux;
                     decoderIn <= tempreg;
-					freez <= 0;
+					freez <= '0';
                 when 1 =>
                     reg4W_10W(31 downto 24) <= pdata2mux;
                     decoderIn <= reg4W_10W (39 downto 30);
@@ -167,6 +167,5 @@ begin
         end process;
         Dec_Data_O <= decoderOut;
         clkout   <= clk;
-
-
+		
 end rtl;
