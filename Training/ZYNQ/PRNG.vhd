@@ -1,3 +1,28 @@
+----------------------------------------------------------------------------------
+-- Company:        apertus° Association
+-- Engineer:       Abd-ElRhman Sobhy
+-- 
+-- Create Date:    28/6/2019 
+-- Design Name:    PRNG 
+-- Module Name:    PRNG  
+-- Target Devices: Zynq-7000  xc7z020clg400-1
+-- Tool versions:  xilinx vivado
+-- Description:    PRNG(Pseudo Random Number Generation) that generate every 8 bit 
+--                 a new word using Fibonacci LFSR of polynomial 5320
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+-- This program is free software: you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation, either version
+-- 3 of the License, or (at your option) any later version.
+----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 

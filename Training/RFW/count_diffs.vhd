@@ -6,7 +6,7 @@ entity count_diff is
     port ( 
 	A : in std_logic_vector (7 downto 0);
 	B : in std_logic_vector (7 downto 0);
-        difference : out  std_logic_vector (3 downto 0));
+    difference : out  std_logic_vector (3 downto 0));
 end count_diff;
 
 architecture rtl of count_diff is

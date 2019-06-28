@@ -144,6 +144,10 @@ begin
         end if;
     end process;
 
+	process(word_clk)
+	begin
+
+	end process;
 	
 	rst_sys <= rst or dec_8b(7) or dec_8b(6) or dec_8b(5) or dec_8b(4)
 		or dec_8b(3) or dec_8b(2) or dec_8b(1) or dec_8b(0);
