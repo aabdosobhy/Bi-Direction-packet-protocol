@@ -10,7 +10,8 @@ entity deserializer is
     port (
         sdataIn  : in std_logic;
         rst    : in std_logic;
-		clkout   : out std_logic;
+		clk_gen : out std_logic;
+		clk_x8   : out std_logic;
         Dec_Data_O : out std_logic_vector (7 downto 0);
         freez : out std_logic
     );
@@ -165,7 +166,9 @@ begin
                     decoderIn <= reg4W_10W (9 downto 0);
             end case;
         end process;
+		
         Dec_Data_O <= decoderOut;
-        clkout   <= clk;
+        clk_gen <= clk_rec;
+		clk_x8 <= clk;
 		
 end rtl;

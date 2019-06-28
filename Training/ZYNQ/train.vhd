@@ -61,19 +61,6 @@ architecture rtl of train is
             q : out std_logic_vector(SIZE -1 downto 0)	-- o/p data register
         ); 
     end component;
-    
-    component sh_ld_reg is
-        generic(
-            SIZE : integer := 8
-        );
-        port(
-            clk : in std_logic;		-- clock
-            enb : in std_logic;		-- enable write
-            rst : in std_logic;		-- reset
-            din_ld : in std_logic_vector(SIZE -2 downto 0);	-- load new data to shift
-            sh_O : out std_logic    -- O/p LSB
-            ); 
-    end component;
 
     signal rst_save : std_logic;
     signal enc_8bit : std_logic_vector(7 downto 0);
