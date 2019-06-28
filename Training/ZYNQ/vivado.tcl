@@ -16,6 +16,11 @@ update_compile_order -fileset sources_1
 update_compile_order -fileset sources_1
 launch_simulation
 
+set_property PART xc7z020clg400-1 [current_project]
+set_property TARGET_LANGUAGE VHDL [current_project]
+
+
+
 
 add_force {/train/clk} -radix hex {1 0ns} {0 50000ps} -repeat_every 100000ps
 add_force {/train/rst} -radix hex {1 0ns}
