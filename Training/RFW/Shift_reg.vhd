@@ -44,15 +44,14 @@ begin
         );
     
     process (clk)
-    begin       
-        if rising_edge(clk)  then 
-            if rst = '1' then 
-                sh_rg_I <= (others => '0');
-            elsif enb = '1' then 
+    begin      
+	if rst = '1' then 
+		sh_rg_I <= (others => '0');
+
+        elsif rising_edge(clk) and enb = '1' then 
                 sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
             end if;
         
-        end if;
     end process;
     LSout <= Sh_rg_O;
 end sh_rg_A;
@@ -86,17 +85,15 @@ begin
             q => Sh_rg_O
         );
     
-    process (clk)
+    process (clk, rst)
     begin
         
-        if rising_edge(clk)  then 
-            if rst = '1' then 
-                sh_rg_I <= (SIZE -1 => '1' , others => '0');
-            elsif enb = '1' then 
-                sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
+	if rst ='1' then 
+		sh_rg_I <= (SIZE -1 => '1' , others => '0');
+        elsif rising_edge(clk)  and enb = '1' then 
+                sh_rg_I <= LSin & Sh_rg_O(SIZE -1 downto 1);
             end if;
         
-        end if;
     end process;
     LSout <= Sh_rg_O;
 end sh_Count;

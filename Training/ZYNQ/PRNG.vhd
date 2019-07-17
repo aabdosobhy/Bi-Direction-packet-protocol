@@ -23,6 +23,7 @@
 -- 3 of the License, or (at your option) any later version.
 ----------------------------------------------------------------------------------
 
+
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -39,7 +40,6 @@ entity PRNG is
     end PRNG; 
     
 architecture PRNG7542 of PRNG is
-
 	signal feed1, feed2, feed : std_logic;
     signal lfsr : std_logic_vector(7 downto 0) := SEED;
     

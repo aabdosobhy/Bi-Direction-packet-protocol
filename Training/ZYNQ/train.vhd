@@ -75,6 +75,7 @@ architecture rtl of train is
             );
     end component; 
 
+
     component nRegister is
         generic(
             SIZE : integer := 8

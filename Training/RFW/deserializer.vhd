@@ -8,23 +8,19 @@ USE machxo2.all;
 
 entity deserializer is
     port (
+        e_clk : in std_logic;
+        s_clk : in std_logic;
         sdataIn  : in std_logic;
         rst    : in std_logic;
-		clk_gen : out std_logic;
-		clk_x8   : out std_logic;
         Dec_Data_O : out std_logic_vector (7 downto 0);
-        freez : out std_logic
+        word_align : out std_logic;
+        v_rst : out std_logic;
+        en_PRNG : out std_logic
     );
 end deserializer;
 
 architecture rtl of deserializer is 
     
-    component pll is
-        port (
-            CLKI: in  std_logic; 
-            CLKOP: out  std_logic);
-    end component;
-
     component IDDRX4B
         generic (
             GSR : string
@@ -35,19 +31,6 @@ architecture rtl of deserializer is
         );
     end component;
 
-    component CLKDIVC
-        generic (
-            DIV : string;
-            GSR : string
-            );
-        port (
-            RST: in  std_logic;
-            CLKI: in  std_logic;
-            ALIGNWD: in  std_logic;
-            CDIV1: out std_logic;
-            CDIVX : out std_logic);
-    end component;
-	
 	component  dec_8b10b is	
 		port(
 			RESET : in std_logic ;	-- Global asynchronous reset (AH) 
@@ -59,35 +42,17 @@ architecture rtl of deserializer is
 			);
 	end component;
 
-    signal clk_rec : std_logic;
-    signal clk : std_logic;
-    signal cDiv1_open : std_logic;
+    signal word_align_en : std_logic;
 	signal pdata2mux : std_logic_vector(7 downto 0);
 	signal decoderIn : std_logic_vector(9 downto 0) := (others => '0');
     signal decoderOut : std_logic_vector(7 downto 0) := (others => '0');
-	signal reg4W_10W : std_logic_vector(39 downto 0) := (others => '0');
-	signal tempreg : std_logic_vector(9 downto 0) := (others => '1');
+	signal reg4W_10b : std_logic_vector(39 downto 0) := (others => '0');
+    signal tempreg : std_logic_vector(9 downto 0) := (others => '1');
+    signal setup_en : std_logic := '1';
+
 
 begin 
 
-    pll_inst : pll 
-        port map(
-            CLKI => sdataIn,
-            CLKOP => clk_rec
-        );
-
-        clkdiv_inst : CLKDIVC
-        generic map (
-            DIV => "4.0",
-            GSR => "ENABLED"
-        )
-        port map (
-            RST     => rst,
-            ALIGNWD => '1',
-            CLKI    => clk_rec,
-            CDIV1   => cDiv1_open,
-            CDIVX   => clk
-        );
 
     deserializer : IDDRX4B
         generic map (
@@ -95,10 +60,10 @@ begin
         )
         port map (
             D       => sdataIn,
-            ECLK    => clk_rec,
-            SCLK    => clk,
+            ECLK    => e_clk,
+            SCLK    => s_clk,
             RST     => rst,
-            ALIGNWD => '1',
+            ALIGNWD => word_align_en,
             Q0      => pdata2mux(0),
             Q1      => pdata2mux(1),
             Q2      => pdata2mux(2),
@@ -112,7 +77,7 @@ begin
     decoder_10b_8b : dec_8b10b
         port map (
             RESET    => rst,
-            RBYTECLK => clk,
+            RBYTECLK => s_clk,
             AI       => decoderIn(0),
             BI       => decoderIn(1),
             CI       => decoderIn(2),
@@ -133,11 +98,11 @@ begin
             AO       => decoderOut(0)
         );
 
-        deserialize_proc : process(clk, rst)
+        deserialize_proc : process(s_clk, rst)
         variable state : integer range 0 to 4 := 4;
         begin
             if rst = '0' then
-                if clk'event and clk = '1' then
+                if s_clk'event and s_clk = '1' then
                     if state = 4 then
                         state := 0;
                     else
@@ -147,28 +112,45 @@ begin
             else
                 state := 4;
             end if;
+            
             case state is
                 when 0 =>
-                    reg4W_10W(39 downto 32) <= pdata2mux;
-                    decoderIn <= tempreg;
-					freez <= '0';
+                    reg4W_10b(39 downto 32) <= pdata2mux;
+					en_PRNG <= '0';
                 when 1 =>
-                    reg4W_10W(31 downto 24) <= pdata2mux;
-                    decoderIn <= reg4W_10W (39 downto 30);
+                    reg4W_10b(31 downto 24) <= pdata2mux;
+                    decoderIn <= reg4W_10b (39 downto 30);
+                    en_PRNG <= '1';
                 when 2 =>
-                    reg4W_10W(23 downto 16) <= pdata2mux;
-                    decoderIn <= reg4W_10W (29 downto 20);
+                    reg4W_10b(23 downto 16) <= pdata2mux;
+                    decoderIn <= reg4W_10b (29 downto 20);
+                    en_PRNG <= '1';
                 when 3 =>
-                    reg4W_10W(15 downto 8) <= pdata2mux;
-                    decoderIn <= reg4W_10W (19 downto 10);
+                    reg4W_10b(15 downto 8) <= pdata2mux;
+                    decoderIn <= reg4W_10b (19 downto 10);
+                    en_PRNG <= '1';
+
                 when 4 =>
-                    reg4W_10W(7 downto 0) <= pdata2mux;
-                    decoderIn <= reg4W_10W (9 downto 0);
+                    reg4W_10b(7 downto 0) <= pdata2mux;
+                    decoderIn <= reg4W_10b (9 downto 0);
+                    en_PRNG <= '1';
+
             end case;
         end process;
-		
+        
+        process (e_clk)
+        begin 
+                if decoderOut = "11111111" and setup_en = '1' then 
+                    v_rst <= '1';
+                    setup_en <= '0';
+                else
+                    v_rst <= '0';
+                end if;
+        end process;
+        word_align_en <= '1' when  setup_en ='1' and not (decoderOut = "11110000")
+					else '0';
+        word_align <= word_align_en;
         Dec_Data_O <= decoderOut;
-        clk_gen <= clk_rec;
-		clk_x8 <= clk;
+
 		
 end rtl;
