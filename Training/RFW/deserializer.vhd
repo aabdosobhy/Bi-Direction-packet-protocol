@@ -10,24 +10,32 @@ entity deserializer is
     port (
         e_clk : in std_logic;
         s_clk : in std_logic;
-        sdataIn  : in std_logic;
-        rst    : in std_logic;
+        sdataIn : in std_logic;
+        rst : in std_logic;
+        -- word_align_en : in std_logic;
         Dec_Data_O : out std_logic_vector (7 downto 0);
         word_align : out std_logic;
         v_rst : out std_logic;
+        
+        pdata2mux_s : out std_logic_vector(7 downto 0);
+        state_s : out std_logic_vector(2 downto 0);
+        decoderIn_s : out std_logic_vector(9 downto 0);
+        decoderOut_s : out std_logic_vector(7 downto 0);
+        reg4W_10b_s : out std_logic_vector(39 downto 0);
+
         en_PRNG : out std_logic
     );
 end deserializer;
 
 architecture rtl of deserializer is 
     
-    component IDDRX4B
+    component iddrx4b
         generic (
             GSR : string
         );
         port (
-            D, ECLK, SCLK, RST, ALIGNWD : in std_logic;
-            Q0, Q1, Q2, Q3, Q4, Q5, Q6, Q7 : out std_logic
+            d, eclk, sclk, rst, alignwd : in std_logic;
+            q0, q1, q2, q3, q4, q5, q6, q7 : out std_logic
         );
     end component;
 
@@ -42,13 +50,20 @@ architecture rtl of deserializer is
 			);
 	end component;
 
-    signal word_align_en : std_logic;
-	signal pdata2mux : std_logic_vector(7 downto 0);
+    signal word_align_mask : std_logic := '0';
+    signal rst_wd_mask : std_logic := '0';
+    signal word_align_en : std_logic := '0';
+    signal pdata2mux : std_logic_vector(7 downto 0);
+    signal state : std_logic_vector(2 downto 0);
 	signal decoderIn : std_logic_vector(9 downto 0) := (others => '0');
     signal decoderOut : std_logic_vector(7 downto 0) := (others => '0');
 	signal reg4W_10b : std_logic_vector(39 downto 0) := (others => '0');
     signal tempreg : std_logic_vector(9 downto 0) := (others => '1');
     signal setup_en : std_logic := '1';
+    signal v_rst_sig : std_logic := '0';
+    signal en_prng_sig : std_logic := '0';
+    -- signal flag_append_en : std_logic := '0';
+    -- signal flag_rst_append : std_logic := '0';
 
 
 begin 
@@ -59,25 +74,25 @@ begin
             GSR => "ENABLED"
         )
         port map (
-            D       => sdataIn,
-            ECLK    => e_clk,
-            SCLK    => s_clk,
-            RST     => rst,
-            ALIGNWD => word_align_en,
-            Q0      => pdata2mux(0),
-            Q1      => pdata2mux(1),
-            Q2      => pdata2mux(2),
-            Q3      => pdata2mux(3),
-            Q5      => pdata2mux(4),
-            Q4      => pdata2mux(5),
-            Q6      => pdata2mux(6),
-            Q7      => pdata2mux(7)
+            d       => sdataIn,
+            eclk    => e_clk,
+            sclk    => s_clk,
+            rst     => rst,
+            alignwd => word_align_en,
+            q0      => pdata2mux(0),
+            q1      => pdata2mux(1),
+            q2      => pdata2mux(2),
+            q3      => pdata2mux(3),
+            q4      => pdata2mux(4),
+            q5      => pdata2mux(5),
+            q6      => pdata2mux(6),
+            q7      => pdata2mux(7)
         );
 
     decoder_10b_8b : dec_8b10b
         port map (
             RESET    => rst,
-            RBYTECLK => s_clk,
+            RBYTECLK => e_clk,
             AI       => decoderIn(0),
             BI       => decoderIn(1),
             CI       => decoderIn(2),
@@ -99,58 +114,131 @@ begin
         );
 
         deserialize_proc : process(s_clk, rst)
-        variable state : integer range 0 to 4 := 4;
+        -- variable state : integer range 0 to 4 := 4;
         begin
             if rst = '0' then
-                if s_clk'event and s_clk = '1' then
-                    if state = 4 then
-                        state := 0;
-                    else
-                        state := state + 1;
+                if rising_edge(s_clk) then 
+                
+                -- flag_append_en <= '1';
+
+                    if decoderOut = "00000000" and setup_en = '1' then 
+                        v_rst_sig <= '1';
+                        state <= "000";
+                        setup_en <= '0';
+                    
+                        --word_align_en <= '0';
+                    
+
+                    elsif state = "000" then
+                        state <= "001";
+
+                    
+                    elsif state = "001" then 
+                        state <= "010";
+
+                    
+                    elsif state = "010" then
+                        state <= "011";
+
+                    
+                    elsif state = "011" then
+                        state <= "100";
+
+                    
+                    elsif state = "100" then
+                        state <= "000";
+                    
+                    else 
+                    state <= "000";
+                                        
                     end if;
+                    -- word_align_en <= '0';
+
+                elsif falling_edge(s_clk) then    --falling edge
+
+                    word_align_mask <= '1';
+                --     word_align_en <= '1' when  setup_en ='1' and not (decoderOut = "11110000")
+                --     else '0';
+                        
                 end if;
             else
-                state := 4;
+                state <= "000";
             end if;
             
-            case state is
-                when 0 =>
-                    reg4W_10b(39 downto 32) <= pdata2mux;
-					en_PRNG <= '0';
-                when 1 =>
-                    reg4W_10b(31 downto 24) <= pdata2mux;
-                    decoderIn <= reg4W_10b (39 downto 30);
-                    en_PRNG <= '1';
-                when 2 =>
-                    reg4W_10b(23 downto 16) <= pdata2mux;
-                    decoderIn <= reg4W_10b (29 downto 20);
-                    en_PRNG <= '1';
-                when 3 =>
-                    reg4W_10b(15 downto 8) <= pdata2mux;
-                    decoderIn <= reg4W_10b (19 downto 10);
-                    en_PRNG <= '1';
 
-                when 4 =>
-                    reg4W_10b(7 downto 0) <= pdata2mux;
-                    decoderIn <= reg4W_10b (9 downto 0);
-                    en_PRNG <= '1';
-
-            end case;
         end process;
         
         process (e_clk)
         begin 
-                if decoderOut = "11111111" and setup_en = '1' then 
-                    v_rst <= '1';
-                    setup_en <= '0';
-                else
-                    v_rst <= '0';
+                if rising_edge(e_clk) then 
+                   
+                    if state = "001" then 
+                        decoderIn <= reg4W_10b (39 downto 30);
+                         en_prng_sig<= '1';
+
+                    elsif state = "010" then 
+                        decoderIn <= reg4W_10b (29 downto 20);
+                        en_prng_sig <= '1';
+
+                    elsif state = "011" then 
+                        decoderIn <= reg4W_10b (19 downto 10);
+                        en_prng_sig <= '1';
+
+                    elsif state = "100" then 
+                        decoderIn <= reg4W_10b (9 downto 0);
+                        en_prng_sig <= '1';
+                    else 
+                        en_prng_sig <= '0';
+                    end if;
+                    
+                    if rst_wd_mask = '1' then 
+                        word_align_mask <= '0';
+                    end if;
+                else  -- falling edge
+                    if s_clk = '1' then 
+                        if state = "001" then                             
+                            reg4W_10b(31 downto 24) <= pdata2mux;
+
+                        elsif state = "010" then                             
+                            reg4W_10b(23 downto 16) <= pdata2mux;
+                           
+                        elsif state = "011" then                             
+                            reg4W_10b(15 downto 8) <= pdata2mux;
+
+                        elsif state = "100" then 
+                            reg4W_10b(7 downto 0) <= pdata2mux;
+
+                        else 
+                            reg4W_10b(39 downto 32) <= pdata2mux;
+                        
+                        end if;
+                    -- elsif s_clk = '0' then 
+                    --     if setup_en = '1' and not (decoderOut = "11110000") then 
+                    --         word_align_en <= '1';
+                    --     -- else 
+                    --     --    word_align_en <= '0';
+                    --     end if;
+                    end if;
+
+                    if word_align_mask = '1' then 
+                        rst_wd_mask <= '1';
+                    else word_align_mask <= '0';
+                    end if;
+
                 end if;
         end process;
-        word_align_en <= '1' when  setup_en ='1' and not (decoderOut = "11110000")
-					else '0';
+        word_align_en <= '1' when  setup_en ='1' and (not (decoderOut = "11110000")) and  s_clk = '0'
+                    else '0';
+                    
         word_align <= word_align_en;
         Dec_Data_O <= decoderOut;
+        v_rst <= v_rst_sig;
+        en_PRNG <= en_prng_sig;
+        
+        pdata2mux_s <= pdata2mux;
+        state_s <= state;
+        decoderIn_s <= decoderIn;
+        decoderOut_s <= decoderOut;
+        reg4W_10b_s <= reg4W_10b ;
 
-		
 end rtl;

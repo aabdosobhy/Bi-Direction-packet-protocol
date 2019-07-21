@@ -41,6 +41,12 @@ architecture rtl of train is
 			Dec_Data_O : out std_logic_vector (7 downto 0);
 			word_align : out std_logic;
 			v_rst : out std_logic;
+
+			pdata2mux_s : out std_logic_vector(7 downto 0);
+			state_s : out std_logic_vector(2 downto 0);
+        	decoderIn_s : out std_logic_vector(9 downto 0);
+        	decoderOut_s : out std_logic_vector(7 downto 0);
+        	reg4W_10b_s : out std_logic_vector(39 downto 0);
 			en_PRNG : out std_logic
 			);
 	end component;
@@ -112,11 +118,18 @@ architecture rtl of train is
 	signal not_clk : std_logic;
 	signal dec_8b : std_logic_vector(7 downto 0);
 	signal rst_sys , v_rst : std_logic;
+	
+	signal pdata2mux : std_logic_vector(7 downto 0);
+	signal state : std_logic_vector(2 downto 0);
+	signal decoderIn : std_logic_vector(9 downto 0);
+    signal decoderOut : std_logic_vector(7 downto 0);
+	signal reg4W_10b : std_logic_vector(39 downto 0);
+	
 	signal en_PRNG : std_logic;
 	signal PRNG_O : std_logic_vector(1 downto 0);
-	signal PRNG_8b : std_logic_vector(7 downto 0);
-	signal loop_cnt : std_logic;
-	signal count : std_logic_vector(3 downto 0);
+	signal PRNG_8b : std_logic_vector(11 downto 0);
+	-- signal loop_cnt : std_logic;
+	-- signal count : std_logic_vector(3 downto 0);
 	signal error_cnt : std_logic_vector(3 downto 0);
 	signal BE_I : std_logic_vector(31 downto 0) := (others => '0');
 	signal BE_O : std_logic_vector(31 downto 0);
@@ -142,7 +155,6 @@ begin
             CDIVX   => s_clk
 			);
 			   
-
 	deserilaizer_inst : deserializer 
 		port map (
 			e_clk => e_clk,
@@ -152,8 +164,15 @@ begin
 			Dec_Data_O => dec_8b,
 			word_align => word_align,
 			v_rst => v_rst,
+
+			pdata2mux_s => pdata2mux,
+			state_s => state,
+			decoderIn_s => decoderIn,
+			decoderOut_s => decoderOut,
+			reg4W_10b_s => reg4W_10b,
+			
 			en_PRNG => en_PRNG
-		);
+			);
 
 	PRNG_Reg : PRNG
         generic map (
@@ -166,20 +185,20 @@ begin
             PRNG_O => PRNG_O
         );
 
-	count_r : entity work.sh_rg(sh_Count) 
-        generic map(
-            size => 4)
-        port map(
-            clk => not_clk,
-            rst =>  rst_sys,
-            enb => '1',
-            LSin => loop_cnt,
-            LSout => count
-        );
+	-- count_r : entity work.sh_rg(sh_Count) 
+    --     generic map(
+    --         size => 4)
+    --     port map(
+    --         clk => not_clk,
+    --         rst =>  rst_sys,
+    --         enb => '1',
+    --         LSin => loop_cnt,
+    --         LSout => count
+    --     );
 
 	word_8b_r : sh_2b_rg 
 		generic map(
-			SIZE => 8,
+			SIZE => 12,
 			SHIFT_BS => 2
 			)
 		port map(
@@ -192,25 +211,25 @@ begin
 	
 	count_error : count_diff 
 		port map( 
-			A => PRNG_8b,
+			A => PRNG_8b(7 downto 0),
 			B => dec_8b, 
 			difference => error_cnt
 			);
 		
 	BE_counter : nRegister 
-	generic map (
-		SIZE => 32)
-	port map (
-		clk => e_clk,
-		enb => '1',
-		rst => rst_sys,
-		d => BE_I,
-		q => BE_O
-	); 
+		generic map (
+			SIZE => 32)
+		port map (
+			clk => e_clk,
+			enb => '1',
+			rst => rst_sys,
+			d => BE_I,
+			q => BE_O
+		); 
 
-	process (e_clk)
+	process (s_clk)
 	begin
-		if rising_edge(e_clk) and en_PRNG = '1' and count(1) = '1' then 
+		if falling_edge(s_clk) and en_PRNG = '1' then 
 	
 			BE_I <= std_logic_vector(unsigned( BE_O ) + unsigned( error_cnt ));
 		end if;
@@ -219,6 +238,6 @@ begin
 
 	not_clk <= not e_clk;
 	rst_sys <= rst or v_rst;
-   	loop_cnt <= count(0);
+   	-- loop_cnt <= count(0);
 	BE_cnt <= BE_O;
 end rtl;
