@@ -156,7 +156,7 @@ begin
 
                 elsif falling_edge(s_clk) then    --falling edge
 
-                    word_align_mask <= '1';
+                    -- word_align_mask <= '1';
                 --     word_align_en <= '1' when  setup_en ='1' and not (decoderOut = "11110000")
                 --     else '0';
                         
@@ -191,8 +191,12 @@ begin
                         en_prng_sig <= '0';
                     end if;
                     
-                    if rst_wd_mask = '1' then 
-                        word_align_mask <= '0';
+                    
+                    if word_align_mask = '1' then 
+                        rst_wd_mask <= '1';
+                    end if;
+                    if s_clk = '1' then 
+                        rst_wd_mask <= '0';
                     end if;
                 else  -- falling edge
                     if s_clk = '1' then 
@@ -218,16 +222,23 @@ begin
                     --     -- else 
                     --     --    word_align_en <= '0';
                     --     end if;
+                    else 
+                        if word_align_mask = '0' and rst_wd_mask = '0' then 
+                            word_align_mask <= '1';
+                        else 
+                            word_align_mask <= '0';
+                        end if;
+
                     end if;
 
-                    if word_align_mask = '1' then 
-                        rst_wd_mask <= '1';
-                    else word_align_mask <= '0';
-                    end if;
+                    -- if word_align_mask = '1' then 
+                    --     rst_wd_mask <= '1';
+                    -- -- else word_align_mask <= '0';
+                    -- end if;
 
                 end if;
         end process;
-        word_align_en <= '1' when  setup_en ='1' and (not (decoderOut = "11110000")) and  s_clk = '0'
+        word_align_en <= '1' when  setup_en ='1' and (not (decoderOut = "11110000")) and  word_align_mask = '1'
                     else '0';
                     
         word_align <= word_align_en;
@@ -239,6 +250,6 @@ begin
         state_s <= state;
         decoderIn_s <= decoderIn;
         decoderOut_s <= decoderOut;
-        reg4W_10b_s <= reg4W_10b ;
+        reg4W_10b_s <= reg4W_10b;
 
 end rtl;
