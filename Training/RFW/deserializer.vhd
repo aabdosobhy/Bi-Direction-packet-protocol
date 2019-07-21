@@ -51,7 +51,7 @@ architecture rtl of deserializer is
 	end component;
 
     signal word_align_mask : std_logic := '0';
-    signal rst_wd_mask : std_logic := '0';
+    signal rst_wd_mask : std_logic := '1';
     signal word_align_en : std_logic := '0';
     signal pdata2mux : std_logic_vector(7 downto 0);
     signal state : std_logic_vector(2 downto 0);
