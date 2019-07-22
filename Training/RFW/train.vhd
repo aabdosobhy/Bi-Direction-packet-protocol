@@ -8,8 +8,8 @@ use machxo2.all;
 
 entity train is
 	Generic(
-        SEED : std_logic_vector(7 downto 0) := "11100111"
-    );
+		SEED : std_logic_vector(7 downto 0) := "11100111"
+		);
 	port(
 		clk : std_logic;
 		datain : in std_logic;		-- clock
@@ -20,16 +20,16 @@ end train;
 
 architecture rtl of train is
 	component nRegister is
-        generic(
-            SIZE : integer := 8
-        );
-        port(
-            clk : in std_logic;		-- clock
-            enb : in std_logic;		-- enable write
-            rst : in std_logic;		-- reset
-            d : in std_logic_vector(SIZE -1 downto 0);	-- data to register
-            q : out std_logic_vector(SIZE -1 downto 0)	-- o/p data register
-        ); 
+		generic(
+			SIZE : integer := 8
+			);
+		port(
+			clk : in std_logic;		-- clock
+			enb : in std_logic;		-- enable write
+			rst : in std_logic;		-- reset
+			d : in std_logic_vector(SIZE -1 downto 0);	-- data to register
+			q : out std_logic_vector(SIZE -1 downto 0)	-- o/p data register
+			); 
 	end component;
 	
 	component deserializer is
@@ -44,9 +44,9 @@ architecture rtl of train is
 
 			pdata2mux_s : out std_logic_vector(7 downto 0);
 			state_s : out std_logic_vector(2 downto 0);
-        	decoderIn_s : out std_logic_vector(9 downto 0);
-        	decoderOut_s : out std_logic_vector(7 downto 0);
-        	reg4W_10b_s : out std_logic_vector(39 downto 0);
+			decoderIn_s : out std_logic_vector(9 downto 0);
+			decoderOut_s : out std_logic_vector(7 downto 0);
+			reg4W_10b_s : out std_logic_vector(39 downto 0);
 			en_PRNG : out std_logic
 			);
 	end component;
@@ -55,7 +55,8 @@ architecture rtl of train is
 		port (
 			ECLKI : in std_logic;
 			STOP  : in std_logic;
-			ECLKO : out std_logic);
+			ECLKO : out std_logic
+			);
 	end component;
 
 	component CLKDIVC
@@ -80,21 +81,22 @@ architecture rtl of train is
 
 	component PRNG is
 		Generic (
-       		SEED : std_logic_vector := "11100111"
-    	);
+			SEED : std_logic_vector := "11100111"
+			);
 		port (
 			clk : in std_logic;
 			rst : in std_logic;
 			enb : in std_logic;
 			PRNG_O : out std_logic_vector (1 downto 0)
-		);
+			);
 	end component;
 
 	component count_diff is
 		port ( 
-		A : in std_logic_vector (7 downto 0);
-		B : in std_logic_vector (7 downto 0);
-		difference : out  std_logic_vector (3 downto 0));
+			A : in std_logic_vector (7 downto 0);
+			B : in std_logic_vector (7 downto 0);
+			difference : out  std_logic_vector (3 downto 0)
+			);
 	end component;
 
 	component sh_2b_rg is
@@ -108,7 +110,7 @@ architecture rtl of train is
 			enb : in std_logic;
 			LSin : in std_logic_vector(SHIFT_BS -1 downto 0);
 			LSout : out std_logic_vector(SIZE -1 downto 0)
-		);
+			);
 	end component; 
 	
 	signal e_clk  : std_logic;
@@ -121,7 +123,7 @@ architecture rtl of train is
 	signal pdata2mux : std_logic_vector(7 downto 0);
 	signal state : std_logic_vector(2 downto 0);
 	signal decoderIn : std_logic_vector(9 downto 0);
-    signal decoderOut : std_logic_vector(7 downto 0);
+	signal decoderOut : std_logic_vector(7 downto 0);
 	signal reg4W_10b : std_logic_vector(39 downto 0);	
 	signal en_PRNG : std_logic;
 	signal PRNG_O : std_logic_vector(1 downto 0);
@@ -129,7 +131,7 @@ architecture rtl of train is
 	signal error_cnt : std_logic_vector(3 downto 0);
 	signal BE_I : std_logic_vector(31 downto 0) := (others => '0');
 	signal BE_O : std_logic_vector(31 downto 0);
-	
+
 begin
 
 	clk_SYNC_INST: ECLKSYNCA
@@ -138,18 +140,18 @@ begin
 			STOP  => '0',
 			ECLKO => e_clk
 			);
- 
+
 	clkdiv_inst : CLKDIVC
-        generic map (
-            DIV => "4.0",
-            GSR => "ENABLED"
-        	)
-        port map (
-            RST     => rst,
-            ALIGNWD => word_align,
-            CLKI    => e_clk,
-            CDIV1   => cDiv1_open,
-            CDIVX   => s_clk
+		generic map (
+			DIV => "4.0",
+			GSR => "ENABLED"
+			)
+		port map (
+			RST     => rst,
+			ALIGNWD => word_align,
+			CLKI    => e_clk,
+			CDIV1   => cDiv1_open,
+			CDIVX   => s_clk
 			);
 			   
 	deserilaizer_inst : deserializer 
@@ -161,26 +163,24 @@ begin
 			Dec_Data_O => dec_8b,
 			word_align => word_align,
 			v_rst => v_rst,
-
 			pdata2mux_s => pdata2mux,
 			state_s => state,
 			decoderIn_s => decoderIn,
 			decoderOut_s => decoderOut,
 			reg4W_10b_s => reg4W_10b,
-			
 			en_PRNG => en_PRNG
 			);
 
 	PRNG_Reg : PRNG
-        generic map (
-            SEED => SEED
-            )
-        port map(
-            clk => e_clk,
-            rst => rst_sys,
-            enb => en_PRNG,
-            PRNG_O => PRNG_O
-        );
+		generic map (
+			SEED => SEED
+			)
+		port map(
+			clk => e_clk,
+			rst => rst_sys,
+			enb => en_PRNG,
+			PRNG_O => PRNG_O
+			);
 
 	word_8b_r : sh_2b_rg 
 		generic map(
@@ -189,11 +189,11 @@ begin
 			)
 		port map(
 			clk => not_clk,
-            rst =>  rst_sys,
-            enb => en_PRNG,
-            LSin => PRNG_O,
-            LSout => PRNG_8b
-		);
+			rst =>  rst_sys,
+			enb => en_PRNG,
+			LSin => PRNG_O,
+			LSout => PRNG_8b
+			);
 	
 	count_error : count_diff 
 		port map( 
@@ -204,21 +204,22 @@ begin
 		
 	BE_counter : nRegister 
 		generic map (
-			SIZE => 32)
+			SIZE => 32
+			)
 		port map (
 			clk => e_clk,
 			enb => '1',
 			rst => rst_sys,
 			d => BE_I,
 			q => BE_O
-		); 
+			); 
 
 	process (s_clk)
-	begin
-		if falling_edge(s_clk) and en_PRNG = '1' then 
-	
-			BE_I <= std_logic_vector(unsigned( BE_O ) + unsigned( error_cnt ));
-		end if;
+		begin
+			if falling_edge(s_clk) and en_PRNG = '1' then 
+
+				BE_I <= std_logic_vector(unsigned( BE_O ) + unsigned( error_cnt ));
+			end if;
 	end process;
 
 
