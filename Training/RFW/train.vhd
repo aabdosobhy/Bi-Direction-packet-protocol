@@ -217,7 +217,6 @@ begin
 	process (s_clk)
 		begin
 			if falling_edge(s_clk) and en_PRNG = '1' then 
-
 				BE_I <= std_logic_vector(unsigned( BE_O ) + unsigned( error_cnt ));
 			end if;
 	end process;
