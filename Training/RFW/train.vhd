@@ -118,21 +118,18 @@ architecture rtl of train is
 	signal not_clk : std_logic;
 	signal dec_8b : std_logic_vector(7 downto 0);
 	signal rst_sys , v_rst : std_logic;
-	
 	signal pdata2mux : std_logic_vector(7 downto 0);
 	signal state : std_logic_vector(2 downto 0);
 	signal decoderIn : std_logic_vector(9 downto 0);
     signal decoderOut : std_logic_vector(7 downto 0);
-	signal reg4W_10b : std_logic_vector(39 downto 0);
-	
+	signal reg4W_10b : std_logic_vector(39 downto 0);	
 	signal en_PRNG : std_logic;
 	signal PRNG_O : std_logic_vector(1 downto 0);
 	signal PRNG_8b : std_logic_vector(11 downto 0);
-	-- signal loop_cnt : std_logic;
-	-- signal count : std_logic_vector(3 downto 0);
 	signal error_cnt : std_logic_vector(3 downto 0);
 	signal BE_I : std_logic_vector(31 downto 0) := (others => '0');
 	signal BE_O : std_logic_vector(31 downto 0);
+	
 begin
 
 	clk_SYNC_INST: ECLKSYNCA
@@ -185,17 +182,6 @@ begin
             PRNG_O => PRNG_O
         );
 
-	-- count_r : entity work.sh_rg(sh_Count) 
-    --     generic map(
-    --         size => 4)
-    --     port map(
-    --         clk => not_clk,
-    --         rst =>  rst_sys,
-    --         enb => '1',
-    --         LSin => loop_cnt,
-    --         LSout => count
-    --     );
-
 	word_8b_r : sh_2b_rg 
 		generic map(
 			SIZE => 12,
@@ -238,6 +224,5 @@ begin
 
 	not_clk <= not e_clk;
 	rst_sys <= rst or v_rst;
-   	-- loop_cnt <= count(0);
 	BE_cnt <= BE_O;
 end rtl;
