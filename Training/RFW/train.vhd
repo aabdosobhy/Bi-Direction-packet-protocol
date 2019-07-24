@@ -8,7 +8,7 @@ use machxo2.all;
 
 entity train is
 	Generic(
-		SEED : std_logic_vector(7 downto 0) := "11100111"
+		SEED : std_logic_vector(7 downto 0) := "11011110"
 		);
 	port(
 		clk : std_logic;
@@ -92,10 +92,17 @@ architecture rtl of train is
 	end component;
 
 	component count_diff is
+		generic (
+			CMP_SIZE : integer  := 8;
+			OUT_SIZE : integer  := 32
+			);
 		port ( 
-			A : in std_logic_vector (7 downto 0);
-			B : in std_logic_vector (7 downto 0);
-			difference : out  std_logic_vector (3 downto 0)
+			clk : in std_logic;
+			rst : in std_logic;
+			enb : in std_logic;
+			A : in std_logic_vector (CMP_SIZE -1 downto 0);
+			B : in std_logic_vector (CMP_SIZE -1 downto 0);
+			count_diff : out std_logic_vector (OUT_SIZE -1 downto 0)
 			);
 	end component;
 
@@ -117,6 +124,7 @@ architecture rtl of train is
 	signal s_clk : std_logic;
 	signal cDiv1_open : std_logic;
 	signal word_align : std_logic;
+	signal word_align_clkdivc : std_logic := '0';
 	signal not_clk : std_logic;
 	signal dec_8b : std_logic_vector(7 downto 0);
 	signal rst_sys , v_rst : std_logic;
@@ -127,7 +135,7 @@ architecture rtl of train is
 	signal reg4W_10b : std_logic_vector(39 downto 0);	
 	signal en_PRNG : std_logic;
 	signal PRNG_O : std_logic_vector(1 downto 0);
-	signal PRNG_8b : std_logic_vector(11 downto 0);
+	signal PRNG_8b : std_logic_vector(7 downto 0);
 	signal error_cnt : std_logic_vector(3 downto 0);
 	signal BE_I : std_logic_vector(31 downto 0) := (others => '0');
 	signal BE_O : std_logic_vector(31 downto 0);
@@ -148,7 +156,7 @@ begin
 			)
 		port map (
 			RST     => rst,
-			ALIGNWD => word_align,
+			ALIGNWD => word_align_clkdivc,
 			CLKI    => e_clk,
 			CDIV1   => cDiv1_open,
 			CDIVX   => s_clk
@@ -184,7 +192,7 @@ begin
 
 	word_8b_r : sh_2b_rg 
 		generic map(
-			SIZE => 12,
+			SIZE => 8,
 			SHIFT_BS => 2
 			)
 		port map(
@@ -196,33 +204,22 @@ begin
 			);
 	
 	count_error : count_diff 
-		port map( 
-			A => PRNG_8b(7 downto 0),
-			B => dec_8b, 
-			difference => error_cnt
-			);
-		
-	BE_counter : nRegister 
-		generic map (
-			SIZE => 32
+		generic map(
+			CMP_SIZE => 8,
+			OUT_SIZE => 32
 			)
-		port map (
-			clk => e_clk,
-			enb => '1',
+		port map( 
+			clk => s_clk,
 			rst => rst_sys,
-			d => BE_I,
-			q => BE_O
-			); 
+			enb => en_PRNG,
+			A => PRNG_8b,
+			B => dec_8b,
+			count_diff => BE_cnt
+			);
 
-	process (s_clk)
-		begin
-			if falling_edge(s_clk) and en_PRNG = '1' then 
-				BE_I <= std_logic_vector(unsigned( BE_O ) + unsigned( error_cnt ));
-			end if;
-	end process;
+
 
 
 	not_clk <= not e_clk;
 	rst_sys <= rst or v_rst;
-	BE_cnt <= BE_O;
 end rtl;

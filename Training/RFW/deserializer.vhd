@@ -49,8 +49,9 @@ architecture rtl of deserializer is
 
     
     signal word_align_en : std_logic := '0';
-    signal word_align_mask : std_logic := '0';
-    signal rst_wd_mask : std_logic := '1';
+    -- signal word_align_mask : std_logic := '0';
+    signal gnd : std_logic := '0';
+    -- signal rst_wd_mask : std_logic := '1';
     signal pdata2mux : std_logic_vector(7 downto 0);
     signal state : std_logic_vector(2 downto 0);
     signal decoderIn : std_logic_vector(9 downto 0) := (others => '0');
@@ -85,17 +86,17 @@ begin
 
     decoder_10b_8b : dec_8b10b
         port map (
-            RESET    => rst,
+            RESET    => gnd,
             RBYTECLK => e_clk,
             AI       => decoderIn(9),
             BI       => decoderIn(8),
             CI       => decoderIn(7),
             DI       => decoderIn(6),
             EI       => decoderIn(5),
-            FI       => decoderIn(4),
-            GI       => decoderIn(3),
-            HI       => decoderIn(2),
-            II       => decoderIn(1),
+            II       => decoderIn(4),
+            FI       => decoderIn(3),
+            GI       => decoderIn(2),
+            HI       => decoderIn(1),            
             JI       => decoderIn(0),
             HO       => decoderOut(7),
             GO       => decoderOut(6),
@@ -111,13 +112,12 @@ begin
     begin
         if rst = '0' then
             if rising_edge(s_clk) then 
-            
-                if decoderOut = "00000000" and setup_en = '1' then 
-                    v_rst_sig <= '1';
-                    state <= "000";
-                    setup_en <= '0';
+                v_rst_sig <= '0';
+                -- if decoderOut = "00000000" then    
+                --     state <= "000";
 
-                elsif state = "000" then
+                -- els
+                if state = "000" then
                     state <= "001";
                 
                 elsif state = "001" then 
@@ -135,6 +135,13 @@ begin
                 else 
                     state <= "000";
                                     
+                end if;
+            
+            else --falling egde 
+                if decoderOut = "00000000" and setup_en = '1' and rst = '0' then 
+                    v_rst_sig <= '1';
+                    --state <= "000";
+                    setup_en <= '0';    
                 end if;
 
             end if;
@@ -165,18 +172,19 @@ begin
                     en_prng_sig <= '1';
 
                 else 
+                    decoderIn <= tempreg;
                     en_prng_sig <= '0';
 
                 end if;
                 
                 
-                if word_align_mask = '1' then 
-                    rst_wd_mask <= '1';
-                end if;
+                -- if word_align_mask = '1' then 
+                --     rst_wd_mask <= '1';
+                -- end if;
 
-                if s_clk = '1' then 
-                    rst_wd_mask <= '0';
-                end if;
+                -- if s_clk = '1' then 
+                --     rst_wd_mask <= '0';
+                -- end if;
 
             else  -- e_clk falling edge
                 if s_clk = '1' then 
@@ -198,19 +206,19 @@ begin
                     end if;
 
                 else 
-                    if word_align_mask = '0' and rst_wd_mask = '0' then 
-                        word_align_mask <= '1';
-                    else 
-                        word_align_mask <= '0';
-                    end if;
+                    -- if word_align_mask = '0' and rst_wd_mask = '0' then 
+                    --     word_align_mask <= '1';
+                    -- else 
+                    --     word_align_mask <= '0';
+                    -- end if;
 
                 end if;
 
             end if;
     end process;
-    
+
     word_align_en <= '1' when  setup_en ='1' and (not (decoderOut = "11110000")) 
-                    and  word_align_mask = '1' and state = "010"
+                    and  s_clk = '0' and state = "010"
 
                 else '0';
                     

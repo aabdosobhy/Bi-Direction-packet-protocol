@@ -28,7 +28,7 @@ use ieee.std_logic_1164.all;
 
 entity PRNG is
     Generic (
-        SEED : std_logic_vector := "11100111"
+        SEED : std_logic_vector := "11011110"
     );
     port (
         clk : in std_logic;

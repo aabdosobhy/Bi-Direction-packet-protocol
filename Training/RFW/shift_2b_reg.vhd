@@ -23,8 +23,8 @@ begin
 
     process (clk, rst)
     begin    
-	if rst = '1' then 
-                sh_rg <= (others => '0');   
+	    if rst = '1' then 
+                sh_rg <= "01110000";   
         elsif rising_edge(clk) and enb = '1' then 
                 sh_rg <= LSin & Sh_rg(SIZE -1 downto SHIFT_BS );
             end if;
