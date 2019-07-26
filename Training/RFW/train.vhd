@@ -15,7 +15,7 @@ entity train is
 		datain : in std_logic;		-- clock
 		rst : in std_logic;
 		BE_cnt : out std_logic_vector(31 downto 0)
-		); 
+		);  
 end train;
 
 architecture rtl of train is
@@ -51,6 +51,13 @@ architecture rtl of train is
 			);
 	end component;
 
+	component IB
+		port (
+			I : in  std_logic;
+			O : out std_logic
+			);
+	end component;
+
 	component ECLKSYNCA
 		port (
 			ECLKI : in std_logic;
@@ -73,11 +80,40 @@ architecture rtl of train is
 			);
 	end component;
 
-	-- component delay 
-	-- 	port (
-	-- 		A : in std_logic;
-	-- 		Z : out std_logic
-	-- 	);
+	component DQSDLLC
+		generic (
+			FORCE_MAX_DELAY  : in String;
+			FIN              : in String;
+			LOCK_SENSITIVITY : in String
+			);
+		port (
+			CLK      : in  std_logic;
+			RST      : in  std_logic;
+			UDDCNTLN : in  std_logic;
+			FREEZE   : in  std_logic;
+			LOCK     : out std_logic;
+			DQSDEL   : out std_logic
+			);
+	end component;
+
+	component DLLDELC
+		port (
+			CLKI   : in  std_logic;
+			DQSDEL : in  std_logic;
+			CLKO   : out std_logic
+			);
+	end component;
+
+	component DELAYE
+        generic (
+            DEL_VALUE : in String;
+            DEL_MODE  : in String
+        	);
+        port (
+            A : in  std_logic;
+            Z : out std_logic
+        	);
+    end component;
 
 	component PRNG is
 		Generic (
@@ -120,8 +156,9 @@ architecture rtl of train is
 			);
 	end component; 
 	
-	signal e_clk  : std_logic;
-	signal s_clk : std_logic;
+	signal clk_BUFF, d_clk, e_clk, s_clk  : std_logic;
+	signal dqsdel : std_logic;
+	signal data_I_BUFF ,data_in_del : std_logic;
 	signal cDiv1_open : std_logic;
 	signal word_align : std_logic;
 	signal word_align_clkdivc : std_logic := '0';
@@ -139,12 +176,57 @@ architecture rtl of train is
 	signal error_cnt : std_logic_vector(3 downto 0);
 	signal BE_I : std_logic_vector(31 downto 0) := (others => '0');
 	signal BE_O : std_logic_vector(31 downto 0);
-
+	signal dqsdllc_lock : std_logic;
+	
 begin
+
+	data_IB : IB
+		port map(
+			I => datain,
+			O => data_I_BUFF
+			);
+
+
+	clk_IB : IB
+	port map(
+		I => datain,
+		O => data_I_BUFF
+		);
+
+	delay_data : DELAYE
+		generic map (
+			DEL_VALUE => "DELAY0",
+			DEL_MODE  => "ECLK_ALIGNED"
+			)
+		port map (
+			A => clk,
+			Z => clk_BUFF
+			);
+
+	Inst4_DLLDELC : DLLDELC
+		port map (
+			CLKI   => clk_BUFF,
+			DQSDEL => dqsdel,
+			CLKO   => d_clk
+			);
+
+	Inst3_DQSDLLC : DQSDLLC
+		generic map (FORCE_MAX_DELAY => "NO",
+			FIN              => "100.0",
+			LOCK_SENSITIVITY => "LOW"
+			)
+		port map (
+			CLK      => e_clk,
+			RST      => rst,
+			UDDCNTLN => '1',
+			FREEZE   => '0',
+			LOCK     => dqsdllc_lock,
+			DQSDEL   => dqsdel
+			);
 
 	clk_SYNC_INST: ECLKSYNCA
 		port map(
-			ECLKI => clk,
+			ECLKI => d_clk,
 			STOP  => '0',
 			ECLKO => e_clk
 			);
@@ -156,7 +238,7 @@ begin
 			)
 		port map (
 			RST     => rst,
-			ALIGNWD => word_align_clkdivc,
+			ALIGNWD => word_align,
 			CLKI    => e_clk,
 			CDIV1   => cDiv1_open,
 			CDIVX   => s_clk
@@ -166,7 +248,7 @@ begin
 		port map (
 			e_clk => e_clk,
 			s_clk => s_clk,			
-			sdataIn => datain,
+			sdataIn => data_in_del,
 			rst => rst,
 			Dec_Data_O => dec_8b,
 			word_align => word_align,
@@ -216,9 +298,6 @@ begin
 			B => dec_8b,
 			count_diff => BE_cnt
 			);
-
-
-
 
 	not_clk <= not e_clk;
 	rst_sys <= rst or v_rst;

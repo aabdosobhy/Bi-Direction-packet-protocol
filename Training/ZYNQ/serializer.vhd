@@ -47,8 +47,8 @@ begin
 
     master : OSERDESE2 
         generic map ( 
-            DATA_RATE_OQ => "SDR", -- DDR, SDR 
-            DATA_RATE_TQ => "SDR", -- DDR, BUF, SDR 
+            DATA_RATE_OQ => "DDR", -- DDR, SDR 
+            DATA_RATE_TQ => "DDR", -- DDR, BUF, SDR 
             DATA_WIDTH => 10, -- Parallel data width (2-8,10,14) 
             INIT_OQ => '0', -- Initial value of OQ output (1'b0,1'b1) 
             INIT_TQ => '0', -- Initial value of TQ output (1'b0,1'b1) 
@@ -95,8 +95,8 @@ begin
 
     slave : OSERDESE2 
         generic map ( 
-            DATA_RATE_OQ => "SDR", -- DDR, SDR 
-            DATA_RATE_TQ => "SDR", -- DDR, BUF, SDR 
+            DATA_RATE_OQ => "DDR", -- DDR, SDR 
+            DATA_RATE_TQ => "DDR", -- DDR, BUF, SDR 
             DATA_WIDTH => 10, -- Parallel data width (2-8,10,14) 
             INIT_OQ => '1', -- Initial value of OQ output (1'b0,1'b1) 
             INIT_TQ => '1', -- Initial value of TQ output (1'b0,1'b1) 

@@ -20,7 +20,7 @@ entity deserializer is
         decoderIn_s : out std_logic_vector(9 downto 0);
         decoderOut_s : out std_logic_vector(7 downto 0);
         reg4W_10b_s : out std_logic_vector(39 downto 0);
-        en_PRNG : out std_logic
+        en_PRNG : out std_logic 
     );
 end deserializer;
 
@@ -112,38 +112,32 @@ begin
     begin
         if rst = '0' then
             if rising_edge(s_clk) then 
-                v_rst_sig <= '0';
-                -- if decoderOut = "00000000" then    
-                --     state <= "000";
 
-                -- els
+                v_rst_sig <= '0';
+ 
                 if state = "000" then
                     state <= "001";
-                
                 elsif state = "001" then 
                     state <= "010";
-                
                 elsif state = "010" then
                     state <= "011";
-                
                 elsif state = "011" then
                     state <= "100";
-            
                 elsif state = "100" then
                     state <= "000";
-                
                 else 
                     state <= "000";
-                                    
                 end if;
-            
-            else --falling egde 
-                if decoderOut = "00000000" and setup_en = '1' and rst = '0' then 
-                    v_rst_sig <= '1';
-                    --state <= "000";
-                    setup_en <= '0';    
-                end if;
+            	
+			end if;	
+            if falling_edge(s_clk) then 
 
+				if decoderOut = "00000000" and setup_en = '1' and rst = '0' then 
+					
+						v_rst_sig <= '1';
+						setup_en <= '0';   
+				end if;
+               
             end if;
         else
             state <= "000";
@@ -186,7 +180,7 @@ begin
                 --     rst_wd_mask <= '0';
                 -- end if;
 
-            else  -- e_clk falling edge
+            elsif falling_edge(e_clk) then -- e_clk falling edge
                 if s_clk = '1' then 
                     if state = "001" then                             
                         reg4W_10b(31 downto 24) <= pdata2mux;
@@ -204,13 +198,6 @@ begin
                         reg4W_10b(39 downto 32) <= pdata2mux;
                     
                     end if;
-
-                else 
-                    -- if word_align_mask = '0' and rst_wd_mask = '0' then 
-                    --     word_align_mask <= '1';
-                    -- else 
-                    --     word_align_mask <= '0';
-                    -- end if;
 
                 end if;
 

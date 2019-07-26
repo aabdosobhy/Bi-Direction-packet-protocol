@@ -49,7 +49,7 @@ begin
             if rst = '1' then 
                 sh_rg <= (others => '0');
             elsif enb = '1' then 
-                sh_rg <= LSin & Sh_rg(7 downto 1);
+                sh_rg <= LSin & Sh_rg(SIZE -1 downto 1);
             end if;
         
         end if;
