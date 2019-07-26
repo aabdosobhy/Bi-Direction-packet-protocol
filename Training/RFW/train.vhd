@@ -2,9 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-LIBRARY machxo2;
+library machxo2;
 use machxo2.all;
-
 
 entity train is
 	Generic(
@@ -15,7 +14,7 @@ entity train is
 		datain : in std_logic;		-- clock
 		rst : in std_logic;
 		BE_cnt : out std_logic_vector(12 downto 0)
-		);  
+		);
 end train;
 
 architecture rtl of train is
@@ -113,7 +112,13 @@ architecture rtl of train is
             A : in  std_logic;
             Z : out std_logic
         	);
-    end component;
+	end component;
+	
+	component pll is
+		port (
+			CLKI: in  std_logic; 
+			CLKOP: out  std_logic);
+		end component;
 
 	component PRNG is
 		Generic (
@@ -156,7 +161,7 @@ architecture rtl of train is
 			);
 	end component; 
 	
-	signal clk_BUFF, d_clk, e_clk, s_clk  : std_logic;
+	signal clk_BUFF, clk_pll, d_clk, e_clk, s_clk  : std_logic;
 	signal dqsdel : std_logic;
 	signal data_I_BUFF ,data_in_del : std_logic;
 	signal cDiv1_open : std_logic;
@@ -203,14 +208,31 @@ begin
 			Z => data_in_del
 			);
 
-	Inst4_DLLDELC : DLLDELC
+	
+	-- delay_clk : DELAYE
+	-- generic map (
+	-- 	DEL_VALUE => "DELAY0",
+	-- 	DEL_MODE  => "ECLK_CENTERED"
+	-- 	)
+	-- port map (
+	-- 	A => clk_BUFF,
+	-- 	Z => d_clk
+	-- 	);		
+
+	Inst_PLL : pll 
+		port map(
+			CLKI => clk_BUFF, 
+			CLKOP => clk_pll
+			);
+
+	Inst_DLLDELC : DLLDELC
 		port map (
-			CLKI   => clk_BUFF,
+			CLKI   => clk_pll,
 			DQSDEL => dqsdel,
 			CLKO   => d_clk
 			);
 
-	Inst3_DQSDLLC : DQSDLLC
+	Inst_DQSDLLC : DQSDLLC
 		generic map (FORCE_MAX_DELAY => "NO",
 			FIN              => "100.0",
 			LOCK_SENSITIVITY => "LOW"

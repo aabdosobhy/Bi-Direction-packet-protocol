@@ -2,11 +2,12 @@
 -- Company:        apertus° Association
 -- Engineer:       Abd-ElRhman Sobhy
 -- 
--- Create Date:    28/6/2019 
+-- Create Date:    26/7/2019 
 -- Design Name:    PRNG 
 -- Module Name:    PRNG  
--- Target Devices: Zynq-7000  xc7z020clg400-1
--- Tool versions:  xilinx vivado
+-- Target Devices: LCMXO2-1200HC
+-- Package name:   TQFP100
+-- Tool versions:  Lattice Diamond
 -- Description:    PRNG(Pseudo Random Number Generation) that generate every 8 bit 
 --                 a new word using Fibonacci LFSR of polynomial 5320
 --
@@ -15,7 +16,7 @@
 -- Revision: 
 -- Revision 0.01 - File Created
 -- Additional Comments: 
---
+
 ----------------------------------------------------------------------------------
 -- This program is free software: you can redistribute it and/or
 -- modify it under the terms of the GNU General Public License

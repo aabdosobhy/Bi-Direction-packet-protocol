@@ -1,3 +1,30 @@
+----------------------------------------------------------------------------------
+-- Company:        apertus° Association
+-- Engineer:       Abd-ElRhman Sobhy
+-- 
+-- Create Date:    26/7/2019 
+-- Design Name:    Count Difference 
+-- Module Name:    count_diff  
+-- Target Devices: LCMXO2-1200HC
+-- Package name:   TQFP100
+-- Tool versions:  Lattice Diamond
+-- Description:    Cout the difference bits between the two input vectors A & B
+--                 and accumlate that result to count_diff 
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+
+----------------------------------------------------------------------------------
+-- This program is free software: you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation, either version
+-- 3 of the License, or (at your option) any later version.
+----------------------------------------------------------------------------------
+
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
