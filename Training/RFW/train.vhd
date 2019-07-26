@@ -14,7 +14,7 @@ entity train is
 		clk : std_logic;
 		datain : in std_logic;		-- clock
 		rst : in std_logic;
-		BE_cnt : out std_logic_vector(31 downto 0)
+		BE_cnt : out std_logic_vector(12 downto 0)
 		);  
 end train;
 
@@ -188,10 +188,10 @@ begin
 
 
 	clk_IB : IB
-	port map(
-		I => datain,
-		O => data_I_BUFF
-		);
+		port map(
+			I => clk,
+			O => clk_BUFF
+			);
 
 	delay_data : DELAYE
 		generic map (
@@ -199,8 +199,8 @@ begin
 			DEL_MODE  => "ECLK_ALIGNED"
 			)
 		port map (
-			A => clk,
-			Z => clk_BUFF
+			A => data_I_BUFF,
+			Z => data_in_del
 			);
 
 	Inst4_DLLDELC : DLLDELC
@@ -288,7 +288,7 @@ begin
 	count_error : count_diff 
 		generic map(
 			CMP_SIZE => 8,
-			OUT_SIZE => 32
+			OUT_SIZE => 13
 			)
 		port map( 
 			clk => s_clk,

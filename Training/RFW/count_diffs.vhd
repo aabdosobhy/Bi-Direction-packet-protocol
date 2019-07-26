@@ -38,7 +38,7 @@ begin
                     for i in 0 to 7 loop
                         count := count + ("000" & (B(i) xor A(i)));
                     end loop;
-                    difference <= (31 downto 4 => '0') & std_logic_vector(count);
+                    difference <= (OUT_SIZE -1 downto 4 => '0') & std_logic_vector(count);
                 end if;
             end if;
         else 
