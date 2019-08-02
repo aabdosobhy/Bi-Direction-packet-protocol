@@ -39,6 +39,7 @@ read_vhdl -vhdl2008 PRNG.vhd
 read_vhdl -vhdl2008 serializer.vhd
 read_vhdl -vhdl2008 train.vhd
 
+read_xdc top.xdc
 
 update_compile_order -fileset sources_1
 update_compile_order -fileset sources_1

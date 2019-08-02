@@ -1,3 +1,31 @@
+----------------------------------------------------------------------------------
+-- Company:        apertus° Association
+-- Engineer:       Abd-ElRhman Sobhy
+-- 
+-- Create Date:    26/7/2019 
+-- Design Name:    Deserializer
+-- Module Name:    deserializer  
+-- Target Devices: LCMXO2-1200HC
+-- Package name:   TQFP100
+-- grade: 		   4
+-- Tool versions:  Lattice Diamond
+-- Description:    receive the inoput serial bit and generate a 4 words of 10 bits every 5 s_clk 
+--                 cycles and decode every word by the falling edge of sclk to be the decoded 
+--                 8 bits word.
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+
+----------------------------------------------------------------------------------
+-- This program is free software: you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation, either version
+-- 3 of the License, or (at your option) any later version.
+----------------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;

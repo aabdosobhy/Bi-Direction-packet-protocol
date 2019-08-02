@@ -4,7 +4,7 @@
 -- 
 -- Create Date:    28/6/2019 
 -- Design Name:    Link training between ZYNQ and MAchXO2 fpga (ZYNQ side)
--- Module Name:    tain  
+-- Module Name:    train  
 -- Target Devices: Zynq-7000  xc7z020clg400-1
 -- Tool versions:  xilinx vivado
 -- Description:    generates bits using PRNG with a ploynomial of 5320 with 

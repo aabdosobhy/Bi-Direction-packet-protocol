@@ -1,3 +1,29 @@
+----------------------------------------------------------------------------------
+-- Company:        apertus° Association
+-- Engineer:       Abd-ElRhman Sobhy
+-- 
+-- Create Date:    26/7/2019 
+-- Design Name:    train.
+-- Module Name:    train.
+-- Target Devices: LCMXO2-1200HC
+-- Package name:   TQFP100
+-- grade: 		   4
+-- Tool versions:  Lattice Diamond
+-- Description:	   Receive the bits and compare them to the PRNG result and calculate BER.
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+
+----------------------------------------------------------------------------------
+-- This program is free software: you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation, either version
+-- 3 of the License, or (at your option) any later version.
+----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -225,30 +251,30 @@ begin
 			CLKOP => clk_pll
 			);
 
-	Inst_DLLDELC : DLLDELC
-		port map (
-			CLKI   => clk_pll,
-			DQSDEL => dqsdel,
-			CLKO   => d_clk
-			);
+	-- Inst_DLLDELC : DLLDELC
+	-- 	port map (
+	-- 		CLKI   => clk_pll,
+	-- 		DQSDEL => dqsdel,
+	-- 		CLKO   => d_clk
+	-- 		);
 
-	Inst_DQSDLLC : DQSDLLC
-		generic map (FORCE_MAX_DELAY => "NO",
-			FIN              => "100.0",
-			LOCK_SENSITIVITY => "LOW"
-			)
-		port map (
-			CLK      => e_clk,
-			RST      => rst,
-			UDDCNTLN => '1',
-			FREEZE   => '0',
-			LOCK     => dqsdllc_lock,
-			DQSDEL   => dqsdel
-			);
+	-- Inst_DQSDLLC : DQSDLLC
+	-- 	generic map (FORCE_MAX_DELAY => "NO",
+	-- 		FIN              => "100.0",
+	-- 		LOCK_SENSITIVITY => "LOW"
+	-- 		)
+	-- 	port map (
+	-- 		CLK      => e_clk,
+	-- 		RST      => rst,
+	-- 		UDDCNTLN => '1',
+	-- 		FREEZE   => '0',
+	-- 		LOCK     => dqsdllc_lock,
+	-- 		DQSDEL   => dqsdel
+	-- 		);
 
 	clk_SYNC_INST: ECLKSYNCA
 		port map(
-			ECLKI => d_clk,
+			ECLKI => clk_pll, --d_clk,
 			STOP  => '0',
 			ECLKO => e_clk
 			);
