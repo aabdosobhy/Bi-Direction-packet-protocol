@@ -1,4 +1,3 @@
-
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -26,7 +25,7 @@ begin
     begin    
 	    if rst = '1' then 
                 sh_rg <= RST_VALUE;   
-        elsif rising_edge(clk) and enb = '1' then 
+        elsif falling_edge(clk) and enb = '1' then 
                 sh_rg <= LSin & Sh_rg(SIZE -1 downto SHIFT_BS );
             end if;
 

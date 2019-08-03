@@ -113,7 +113,6 @@ architecture rtl of train is
     signal enc_8bit : std_logic_vector(7 downto 0);
     signal enc_10bit : std_logic_vector(9 downto 0);
     signal word_8b_O, word_8b_I : std_logic_vector(7 downto 0);
-    signal not_clk : std_logic;
     signal count : std_logic_vector(4 downto 0);
     signal count1_falling : std_logic := '0';
     signal loop_cnt : std_logic;
@@ -179,7 +178,7 @@ begin
             RST_VALUE => "11110000"
             )
         port map(
-            clk => not_clk,
+            clk => clk,
             rst =>  rst_save,
             enb => en_PRNG_shift,
             LSin => PRNG_O,
@@ -249,9 +248,6 @@ begin
             count1_falling <= count(1);
         end if;
     end process;
-
-            
-    not_clk <= not clk; 
 
     en_shift_wd8b <= not count(0);
 
