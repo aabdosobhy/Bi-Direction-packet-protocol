@@ -27,7 +27,7 @@ begin
                 sh_rg <= RST_VALUE;   
         elsif falling_edge(clk) and enb = '1' then 
                 sh_rg <= LSin & Sh_rg(SIZE -1 downto SHIFT_BS );
-            end if;
+        end if;
 
     end process;
     LSout <= Sh_rg;

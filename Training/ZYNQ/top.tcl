@@ -15,6 +15,7 @@ create_project Train_ZYNQ [pwd]
 
 read_vhdl -vhdl2008 ../register.vhd
 read_vhdl -vhdl2008 ../Shift_reg.vhd
+read_vhdl -vhdl2008 ../Shift_2b_reg.vhd
 read_vhdl -vhdl2008 ../8b10_enc.vhd
 read_vhdl -vhdl2008 ../PRNG.vhd
 read_vhdl -vhdl2008 ../serializer.vhd
