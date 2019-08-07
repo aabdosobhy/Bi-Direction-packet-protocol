@@ -16,7 +16,7 @@
 -- Revision: 
 -- Revision 0.01 - File Created
 -- Additional Comments: 
-
+ 
 ----------------------------------------------------------------------------------
 -- This program is free software: you can redistribute it and/or
 -- modify it under the terms of the GNU General Public License
@@ -39,7 +39,10 @@ entity train is
 		clk : std_logic;
 		datain : in std_logic;		-- clock
 		rst : in std_logic;
-		BE_cnt : out std_logic_vector(12 downto 0)
+		TCK : in std_logic;
+		TMS : in std_logic;
+		TDI : in std_logic;
+		TDO : out std_logic
 		);
 end train;
 
@@ -186,13 +189,50 @@ architecture rtl of train is
 			LSout : out std_logic_vector(SIZE -1 downto 0)
 			);
 	end component; 
+
+	component  sh_ld_rg is
+		generic(
+			SIZE : integer := 8
+			);
+		port (
+			clk : in std_logic;
+			rst : in std_logic;
+			enb : in std_logic;
+			load : in std_logic_vector(SIZE -1 downto 0);
+			LSout : out std_logic
+		);
+	end component; 
+	
+	component JTAGF is
+		generic (
+			ER1 : string;
+			ER2 : string
+			);
+		port  (
+			TCK : in std_logic;
+			TMS : in std_logic;
+			TDI : in std_logic;
+			JTDO2 : in std_logic;
+			JTDO1 : in std_logic;
+			TDO : out std_logic;
+			JTDI : out std_logic;
+			JTCK : out std_logic;
+			JRTI2 : out std_logic;
+			JRTI1 : out std_logic;
+			JSHIFT : out std_logic;
+			JRSTN : out std_logic;
+			JUPDATE : out std_logic;
+			JCE1 : out std_logic;
+			JCE2 : out std_logic
+			);
+	end component;
+
 	
 	signal clk_BUFF, clk_pll, d_clk, e_clk, s_clk  : std_logic;
 	signal dqsdel : std_logic;
 	signal data_I_BUFF ,data_in_del : std_logic;
 	signal cDiv1_open : std_logic;
 	signal word_align : std_logic;
-	signal word_align_clkdivc : std_logic := '0';
 	signal not_clk : std_logic;
 	signal dec_8b : std_logic_vector(7 downto 0);
 	signal rst_sys , v_rst : std_logic;
@@ -201,13 +241,26 @@ architecture rtl of train is
 	signal decoderIn : std_logic_vector(9 downto 0);
 	signal decoderOut : std_logic_vector(7 downto 0);
 	signal reg4W_10b : std_logic_vector(39 downto 0);	
-	signal en_PRNG : std_logic;
+	signal en_PRNG,	en_count : std_logic;
+	signal finish_training : std_logic := '1';
 	signal PRNG_O : std_logic_vector(1 downto 0);
-	signal PRNG_8b : std_logic_vector(7 downto 0);
-	signal error_cnt : std_logic_vector(3 downto 0);
-	signal BE_I : std_logic_vector(31 downto 0) := (others => '0');
-	signal BE_O : std_logic_vector(31 downto 0);
+	signal PRNG_8b : std_logic_vector(7 downto 0);	
 	signal dqsdllc_lock : std_logic;
+	signal BE_cnt: std_logic_vector(127 downto 0);
+	
+	signal jcnt : std_logic_vector(127 downto 0);
+    signal jreg : std_logic_vector(127 downto 0);
+
+    signal jtdi : std_logic;
+    signal jtck : std_logic;
+
+    signal jshift : std_logic;
+    signal jrstn : std_logic;
+    signal jupdate : std_logic;
+
+    signal jce : std_logic_vector(2 downto 1);
+    signal jtdo : std_logic_vector(2 downto 1);
+    signal jrti : std_logic_vector(2 downto 1);
 	
 begin
 
@@ -245,36 +298,36 @@ begin
 	-- 	Z => d_clk
 	-- 	);		
 
-	Inst_PLL : pll 
-		port map(
-			CLKI => clk_BUFF, 
-			CLKOP => clk_pll
+	-- Inst_PLL : pll 
+	-- 	port map(
+	-- 		CLKI => clk_BUFF, 
+	-- 		CLKOP => clk_pll
+	-- 		);
+
+	Inst_DLLDELC : DLLDELC
+		port map (
+			CLKI   => clk_BUFF,
+			DQSDEL => dqsdel,
+			CLKO   => d_clk
 			);
 
-	-- Inst_DLLDELC : DLLDELC
-	-- 	port map (
-	-- 		CLKI   => clk_pll,
-	-- 		DQSDEL => dqsdel,
-	-- 		CLKO   => d_clk
-	-- 		);
-
-	-- Inst_DQSDLLC : DQSDLLC
-	-- 	generic map (FORCE_MAX_DELAY => "NO",
-	-- 		FIN              => "100.0",
-	-- 		LOCK_SENSITIVITY => "LOW"
-	-- 		)
-	-- 	port map (
-	-- 		CLK      => e_clk,
-	-- 		RST      => rst,
-	-- 		UDDCNTLN => '1',
-	-- 		FREEZE   => '0',
-	-- 		LOCK     => dqsdllc_lock,
-	-- 		DQSDEL   => dqsdel
-	-- 		);
+	Inst_DQSDLLC : DQSDLLC
+		generic map (FORCE_MAX_DELAY => "NO",
+			FIN              => "100.0",
+			LOCK_SENSITIVITY => "LOW"
+			)
+		port map (
+			CLK      => e_clk,
+			RST      => rst,
+			UDDCNTLN => '0',
+			FREEZE   => '0',
+			LOCK     => dqsdllc_lock,
+			DQSDEL   => dqsdel
+			);
 
 	clk_SYNC_INST: ECLKSYNCA
 		port map(
-			ECLKI => clk_pll, --d_clk,
+			ECLKI => d_clk, --d_clk,
 			STOP  => '0',
 			ECLKO => e_clk
 			);
@@ -336,17 +389,101 @@ begin
 	count_error : count_diff 
 		generic map(
 			CMP_SIZE => 8,
-			OUT_SIZE => 13
+			OUT_SIZE => 128
 			)
 		port map( 
 			clk => s_clk,
 			rst => rst_sys,
-			enb => en_PRNG,
+			enb => en_count,
 			A => PRNG_8b,
 			B => dec_8b,
 			count_diff => BE_cnt
 			);
 
+	-- final_result_jtag: sh_ld_rg 
+	-- 	generic map(
+	-- 		SIZE => 13
+	-- 		)
+	-- 	port map(
+	-- 		clk => e_clk,
+	-- 		rst => rst,
+	-- 		enb => JRTI1,
+	-- 		load => BE_cnt,
+	-- 		LSout => shift_count_o
+	-- 	);
+
+    JTAGF_inst: JTAGF
+		generic map (
+			ER1 => "ENABLED",
+			ER2 => "ENABLED" )
+		port map (
+			TCK => '0',
+			TMS => '0',
+			TDI => '0',
+			TDO => open,
+			--
+			JTDI => jtdi,
+			JTCK => jtck,
+			--
+			JSHIFT => jshift,
+			JUPDATE => jupdate,
+			JRSTN => jrstn,
+			--
+			JRTI1 => jrti(1),
+			JRTI2 => jrti(2),
+			--
+			JTDO1 => jtdo(1),
+			JTDO2 => jtdo(2),
+			--
+			JCE1 => jce(1),
+			JCE2 => jce(2) );
+
+	process (s_clk)
+		begin 
+			if rising_edge(s_clk) and dec_8b = "11010110" then 
+				finish_training <= '0';
+			end if;
+	end process;
+
+    ce1_proc : process(e_clk, jrti(1))
+		variable jce_v : std_logic := '0';
+    begin
+		if rising_edge(e_clk) then			
+			if jrti(1) = '1' then
+				jcnt <= BE_cnt;
+			end if;
+		end if;
+    end process;
+
+    er1_proc : process(jtck, jce(1))
+    begin
+		if falling_edge(jtck) then
+			if jrstn = '0' then		-- Test Logic Reset
+
+			elsif jce(1) = '1' then	-- Capture/Shift DR
+				if jshift = '1' then	-- Shift DR
+					jreg <= jtdi & jreg(127 downto 1);
+
+				else			-- Capture DR
+					jreg <= jcnt;
+				end if;
+
+			-- elsif jupdate = '1' then
+			-- 	led(7 downto 0) <= jreg(7 downto 0);
+			-- 	rst <= jreg(8);
+			elsif jrti(1) = '1' then	-- Run Test/Idle
+
+			else			-- Last TDI bit
+				jreg <= jtdi & jreg(127 downto 1);
+			end if; 
+		end if;
+    end process;
+
+    jtdo(1) <= jreg(0);
+
+	en_count <= en_PRNG and finish_training;
+
 	not_clk <= not e_clk;
-	rst_sys <= rst or v_rst;
+	rst_sys <= rst or v_rst;	
+			
 end rtl;

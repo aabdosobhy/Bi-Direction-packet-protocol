@@ -38,7 +38,9 @@ entity train is
         clk : in std_logic;
         rst : in std_logic;
         lvds_p : out std_logic;
-        lvds_n : out std_logic
+        lvds_n : out std_logic;
+        clk_o_p : out std_logic;
+        clk_o_n : out std_logic
         );
     end train; 
     
@@ -206,7 +208,7 @@ begin
             serial_O => lvds_O
         );
 
-    OBUFDS_inst : OBUFDS
+    lvds_inst : OBUFDS
         generic map (
             IOSTANDARD => "DEFAULT",
             SLEW => "SLOW"
@@ -216,6 +218,17 @@ begin
             OB => lvds_n,
             I => lvds_O
         );
+
+    lvds_clk_inst : OBUFDS
+        generic map (
+            IOSTANDARD => "DEFAULT",
+            SLEW => "SLOW"
+            )
+        port map (
+            O => clk_o_p,
+            OB => clk_o_n,
+            I => clk
+        );        
 
     process(clk, rst)
         variable count_alignwd : integer range 0 to 42 := 0;        

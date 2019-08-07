@@ -27,12 +27,23 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+library unisim;
+use unisim.VCOMPONENTS.ALL;
+
+
 entity top is
     port (
         clk : in std_logic;
         rst : in std_logic;
         lvds_p : out std_logic;
-        lvds_n : out std_logic
+        lvds_n : out std_logic;
+        clk_o_p : out std_logic;
+        clk_o_n : out std_logic;
+        i2c0_scl : inout std_logic;	-- icsp clock
+        i2c0_sda : inout std_logic;	-- icsp data
+      --
+        i2c1_scl : inout std_logic;	-- icsp clock
+        i2c1_sda : inout std_logic	-- icsp data
         );
     end top; 
     
@@ -46,20 +57,123 @@ architecture rtl of top is
             clk : in std_logic;
             rst : in std_logic;
             lvds_p : out std_logic;
-            lvds_n : out std_logic
+            lvds_n : out std_logic;
+            clk_o_p : out std_logic;
+            clk_o_n : out std_logic
             );
-        end component; 
+    end component; 
+
+    signal ps_fclk : std_logic_vector(3 downto 0);
+    signal clk_100 : std_logic;
+
+        -- I2C Signals
+    --------------------------------------------------------------------
+    signal i2c0_sda_i : std_logic;
+    signal i2c0_sda_o : std_logic;
+    signal i2c0_sda_t : std_logic;
+    signal i2c0_sda_t_n : std_logic;
+
+    signal i2c0_scl_i : std_logic;
+    signal i2c0_scl_o : std_logic;
+    signal i2c0_scl_t : std_logic;
+    signal i2c0_scl_t_n : std_logic;
+
+    signal i2c1_sda_i : std_logic;
+    signal i2c1_sda_o : std_logic;
+    signal i2c1_sda_t : std_logic;
+    signal i2c1_sda_t_n : std_logic;
+
+    signal i2c1_scl_i : std_logic;
+    signal i2c1_scl_o : std_logic;
+    signal i2c1_scl_t : std_logic;
+    signal i2c1_scl_t_n : std_logic;
+
+
+
 begin
+
+    ps7_stub_inst : entity work.ps7_stub
+        port map (
+            ps_fclk => ps_fclk,
+            i2c0_sda_i => i2c0_sda_i,
+            i2c0_sda_o => i2c0_sda_o,
+            i2c0_sda_t_n => i2c0_sda_t_n,
+            --
+            i2c0_scl_i => i2c0_scl_i,
+            i2c0_scl_o => i2c0_scl_o,
+            i2c0_scl_t_n => i2c0_scl_t_n,
+            --
+            i2c1_sda_i => i2c1_sda_i,
+            i2c1_sda_o => i2c1_sda_o,
+            i2c1_sda_t_n => i2c1_sda_t_n,
+            --
+            i2c1_scl_i => i2c1_scl_i,
+            i2c1_scl_o => i2c1_scl_o,
+            i2c1_scl_t_n => i2c1_scl_t_n
+        );
+
+    BUFG_clk100_inst : BUFG
+        port map (
+            I => ps_fclk(0),
+            O => clk_100 
+            );
+    -- div_led_inst : entity work.async_div
+    --     generic map (
+    --         STAGES => 28 )
+    --     port map (
+    --         clk_in => ps_fclk(0),
+    --         clk_out => clk_100 
+    --     );
 
     train_inst : train 
         generic map (
             SEED => "11100111"
             )
         port map(
-            clk => clk,
+            clk => clk_100,
             rst => rst,                   
             lvds_p => lvds_p,
-            lvds_n => lvds_n
+            lvds_n => lvds_n,
+            clk_o_p => clk_o_p, 
+            clk_o_n => clk_o_n
         );
+
+        --------------------------------------------------------------------
+    -- I2C Interface
+    --------------------------------------------------------------------
+
+    i2c0_sda_t <= not i2c0_sda_t_n;
+
+    IOBUF_sda_inst0 : IOBUF
+	port map (
+	    I => i2c0_sda_o, O => i2c0_sda_i,
+	    T => i2c0_sda_t, IO => i2c0_sda );
+
+    i2c0_scl_t <= not i2c0_scl_t_n;
+
+    IOBUF_scl_inst0 : IOBUF
+	port map (
+	    I => i2c0_scl_o, O => i2c0_scl_i,
+	    T => i2c0_scl_t, IO => i2c0_scl );
+
+    i2c1_sda_t <= not i2c1_sda_t_n;
+
+    IOBUF_sda_inst1 : IOBUF
+	port map (
+	    I => i2c1_sda_o, O => i2c1_sda_i,
+	    T => i2c1_sda_t, IO => i2c1_sda );
+
+    PULLUP_sda_inst : PULLUP
+        port map ( O => i2c1_sda );
+
+    i2c1_scl_t <= not i2c1_scl_t_n;
+
+    IOBUF_scl_inst1 : IOBUF
+	port map (
+	    I => i2c1_scl_o, O => i2c1_scl_i,
+	    T => i2c1_scl_t, IO => i2c1_scl );
+
+    PULLUP_scl_inst : PULLUP
+        port map ( O => i2c1_scl );
 
 end rtl;
