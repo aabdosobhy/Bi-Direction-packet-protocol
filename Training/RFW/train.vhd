@@ -38,11 +38,7 @@ entity train is
 	port(
 		clk : std_logic;
 		datain : in std_logic;		-- clock
-		rst : in std_logic;
-		TCK : in std_logic;
-		TMS : in std_logic;
-		TDI : in std_logic;
-		TDO : out std_logic
+		rst : in std_logic
 		);
 end train;
 
@@ -480,7 +476,7 @@ begin
     end process;
 
     jtdo(1) <= jreg(0);
-
+	--jtdo(1) <= e_clk;
 	en_count <= en_PRNG and finish_training;
 
 	not_clk <= not e_clk;
