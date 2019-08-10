@@ -6,7 +6,6 @@ SEARCH="/usr/local/diamond/3.11_x64/ispfpga/vhdl/data/"
 
 ALL:	train.bit
 
-
 %.edi : %.vhd %.fdc
 	@echo "### running synpwrap ..."
 	@synpwrap -prj $*.prj >$*.synpwrap.out \

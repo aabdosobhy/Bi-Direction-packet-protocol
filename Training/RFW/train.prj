@@ -1,6 +1,6 @@
 #project files
 
-add_file -vhdl -lib work "C:/lscc/diamond/3.10_x64/cae_library/synthesis/vhdl/machxo2.vhd"
+add_file -vhdl -lib work "/usr/local/diamond/3.11_x64/cae_library/synthesis/vhdl/machxo2.vhd"
 #add_file -vhdl -lib work "/opt/diamond/3.5_x64/cae_library/synthesis/vhdl/machxo2.vhd"
 add_file -vhdl -lib work "8b10_dec.vhd"
 add_file -vhdl -lib work "count_diffs.vhd"
@@ -11,6 +11,8 @@ add_file -vhdl -lib work "shift_2b_reg.vhd"
 add_file -vhdl -lib work "shift_load_Reg.vhd"
 add_file -vhdl -lib work "Shift_reg.vhd"
 add_file -vhdl -lib work "train.vhd"
+
+add_file -fpga_constraint "train.fdc"
 
 
 #implementation "count"
@@ -25,17 +27,22 @@ set_option -project_relative_includes 1
 set_option -technology MACHXO2
 #set_option -part LFXP6C
 set_option -part LCMXO2_1200HC
-set_option -package TG100C
+set_option -package TQFP100
 set_option -speed_grade -4
 set_option -part_companion ""
 
 #compilation/mapping options
 
-# mapper_options
+# hdl_compiler_options
+set_option -distributed_compile 0
+
+# mapper_without_write_options
 set_option -frequency auto
+set_option -srs_instrumentation 1
+
+# mapper_options
 set_option -write_verilog 0
 set_option -write_vhdl 0
-set_option -srs_instrumentation 1
 
 # Lattice XP
 set_option -maxfan 100
@@ -44,9 +51,16 @@ set_option -retiming 0
 set_option -pipe 1
 set_option -forcegsr no
 set_option -fix_gated_and_generated_clocks 1
-set_option -RWCheckOnRam 1
+set_option -rw_check_on_ram 1
 set_option -update_models_cp 0
 set_option -syn_edif_array_rename 1
+set_option -Write_declared_clocks_only 1
+
+# NFilter
+set_option -no_sequential_opt 0
+
+# timing_analyst_options
+set_option -reporting_output_srm 0
 
 # sequential_optimization_options
 set_option -symbolic_fsm_compiler 1
@@ -56,8 +70,19 @@ set_option -compiler_compatible 0
 set_option -resource_sharing 1
 set_option -multi_file_compilation_unit 1
 
+# Compiler Options
+set_option -auto_infer_blackbox 0
+
+# Compiler Options
+set_option -vhdl2008 1
+
+#timing report file option
+set_option -reporting_filename "train.ta"
+
 #automatic place and route (vendor) options
 set_option -write_apr_constraint 1
 
 #set result format/file last
 project -result_file "./train.edi"
+impl -active "train_impl"
+
