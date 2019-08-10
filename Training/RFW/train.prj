@@ -1,6 +1,6 @@
 #project files
 
-add_file -vhdl -lib work "/usr/local/diamond/3.11_x64/cae_library/synthesis/vhdl/machxo2.vhd"
+add_file -vhdl -lib work "/usr/local/diamond/3.10_x64/cae_library/synthesis/vhdl/machxo2.vhd"
 #add_file -vhdl -lib work "/opt/diamond/3.5_x64/cae_library/synthesis/vhdl/machxo2.vhd"
 add_file -vhdl -lib work "8b10_dec.vhd"
 add_file -vhdl -lib work "count_diffs.vhd"
@@ -56,11 +56,6 @@ set_option -update_models_cp 0
 set_option -syn_edif_array_rename 1
 set_option -Write_declared_clocks_only 1
 
-# NFilter
-set_option -no_sequential_opt 0
-
-# timing_analyst_options
-set_option -reporting_output_srm 0
 
 # sequential_optimization_options
 set_option -symbolic_fsm_compiler 1
@@ -69,15 +64,6 @@ set_option -symbolic_fsm_compiler 1
 set_option -compiler_compatible 0
 set_option -resource_sharing 1
 set_option -multi_file_compilation_unit 1
-
-# Compiler Options
-set_option -auto_infer_blackbox 0
-
-# Compiler Options
-set_option -vhdl2008 1
-
-#timing report file option
-set_option -reporting_filename "train.ta"
 
 #automatic place and route (vendor) options
 set_option -write_apr_constraint 1
