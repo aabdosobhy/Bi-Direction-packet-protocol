@@ -2,39 +2,68 @@ BOARD="MachXO2"
 DEVICE="LCMXO2-1200HC"
 PKG="TQFP100"
 GRADE=4
-SEARCH="/usr/local/diamond/3.10_x64/ispfpga/vhdl/data/"
-BUILD= ./build/
-SRC= ./src/
-CFG= ./cfg/
+SEARCH="/usr/local/diamond/3.11_x64/ispfpga/vhdl/data/"
+
 
 ALL:	train.bit
 
-%.edi : %.vhd 
-	@echo "1"
-	synpwrap -prj "$*.prj"
+%.edi : %.vhd %.fdc
+	@echo "### running synpwrap ..."
+	@synpwrap -prj train.prj >$*.synpwrap.out \
+	    || ( ./cc.sh srr $*.srr && false )
+	@echo "--- premap"
+	@ ./cc.sh srr synlog/$*_premap.srr
+	@echo "--- fpga_mapper"
+	@ ./cc.sh srr synlog/$*_fpga_mapper.srr
+	@echo "--- synpwrap"
+	@ ./cc.sh synpwrap $*.synpwrap.out
 
 %.ngo : %.edi
-	@echo "2"
-	edif2ngd -l $(BOARD) -d $(DEVICE) $< $@
+	@echo "### running edif2ngd ..."
+	@edif2ngd -l $(BOARD) -d $(DEVICE) $< $@ \
+	    |& tee $*.edif2ngd.out | ./cc.sh edif2ngd
 
 %.ngd : %.ngo
-	@echo "3"
-	ngdbuild -a $(BOARD) -d $(DEVICE) -p $(SEARCH) $< $@
+	@echo "### running ngdbuild ..."
+	@ngdbuild -a $(BOARD) -d $(DEVICE) -p $(SEARCH) $< $@ \
+	    |& tee $*.ngdbuild.out | ./cc.sh ngdbuild
 
+# %.ncd : %.ngd 
 %.ncd : %.ngd %.lpf
-	@echo "4"	
-	map -a $(BOARD) -p $(DEVICE) -t $(PKG) -s $(GRADE) $< -o $@ $*.lpf
+	@echo "### running map ..."
+	@map -a $(BOARD) -p $(DEVICE) -t $(PKG) -s $(GRADE) $< -o $@ \
+	    |& tee $*.map.out | ./cc.sh map
+	@ncdread $@ -o $@.asc \
+	    |& ./cc.sh ncdread
+	@./cc.sh mrp $*.mrp
 
 %.o.ncd : %.ncd
-	@echo "5"
-	par -w $< $*.o.ncd $*.prf
+	@echo "### running par ..."
+	@par -w $< $*.o.ncd $*.prf \
+	    |& tee $*.par.out | ./cc.sh par
+	@ncdread $@ -o $@.asc \
+	    |& ./cc.sh ncdread
+
+%.twr : %.o.ncd
+	trce -v $< $*.prf -o $@
 
 %.bit : %.o.ncd
-	bitgen -w $< $@
+	@echo "### running bitgen ..."
+	@bitgen -g RamCfg:Reset -w $< $@ \
+	    |& tee $*.bitgen.out | ./cc.sh bitgen
 
-#$(BUILD)%.svf : $(BUILD)%.bit
-#	@echo "create bitmap"
-#	ddtcmd -oft -svfsingle -revd -op "SRAM Fast Program" -if $< -of $@
+%.jed : %.o.ncd
+	@echo "### running bitgen ..."
+	@bitgen -w -jedec $< $@ \
+	    |& tee $*.bitgen.out | ./cc.sh bitgen
+
+%.bin : %.jed
+	@ddtcmd -oft -jed2bin -if $< -of $@ \
+	    |& tee $*.ddtcmd.bin.out | ./cc.sh ddtcmd
+
+%.hex : %.jed
+	@ddtcmd -oft -jed2hex -compress on -if $< -of $@ \
+	    |& tee $*.ddtcmd.hex.out | ./cc.sh ddtcmd
 
 clean:
 	rm -f *~ *.db *.htm *.xml
@@ -60,3 +89,4 @@ clean:
 	rm -rf synlog
 	rm -rf synwork
 	rm -rf syntmp
+
