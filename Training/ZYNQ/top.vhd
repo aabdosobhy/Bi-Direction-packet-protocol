@@ -34,7 +34,6 @@ use unisim.VCOMPONENTS.ALL;
 entity top is
     port (
         clk : in std_logic;
-        rst : in std_logic;
         lvds_p : out std_logic;
         lvds_n : out std_logic;
         clk_o_p : out std_logic;
@@ -62,7 +61,8 @@ architecture rtl of top is
 
     signal ps_fclk : std_logic_vector(3 downto 0);
     signal clk_100 : std_logic;
-
+	signal ps_reset_n : std_logic_vector(3 downto 0);
+	signal rst : std_logic;
     --------------------------------------------------------------------
     -- I2C Signals
     --------------------------------------------------------------------
@@ -98,7 +98,8 @@ begin
             --
             i2c1_scl_i => i2c1_scl_i,
             i2c1_scl_o => i2c1_scl_o,
-            i2c1_scl_t_n => i2c1_scl_t_n
+            i2c1_scl_t_n => i2c1_scl_t_n,
+			ps_reset_n => ps_reset_n
         );
 
     BUFG_clk100_inst : BUFG
@@ -159,4 +160,6 @@ begin
     PULLUP_scl_inst : PULLUP
         port map ( O => i2c_scl );
 
+	
+	rst <= ps_reset_n(0);
 end rtl;
