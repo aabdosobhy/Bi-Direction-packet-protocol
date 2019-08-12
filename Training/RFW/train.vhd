@@ -269,12 +269,6 @@ begin
 			);
 
 
-	clk_IB : IB
-		port map(
-			I => clk,
-			O => clk_BUFF
-			);
-
 	delay_data : DELAYE
 		generic map (
 			DEL_VALUE => "DELAY0",
@@ -285,7 +279,13 @@ begin
 			Z => data_in_del
 			);
 
-	
+
+	-- clk_IB : IB
+	-- 	port map(
+	-- 		I => clk,
+	-- 		O => clk_BUFF
+	-- 		);
+
 	-- delay_clk : DELAYE
 	-- generic map (
 	-- 	DEL_VALUE => "DELAY0",
@@ -304,14 +304,14 @@ begin
 
 	Inst_DLLDELC : DLLDELC
 		port map (
-			CLKI   => clk_BUFF,
+			CLKI   => clk,
 			DQSDEL => dqsdel,
 			CLKO   => d_clk
 			);
 
 	Inst_DQSDLLC : DQSDLLC
 		generic map (FORCE_MAX_DELAY => "NO",
-			FIN              => "100.0",
+			FIN              => "50.0",
 			LOCK_SENSITIVITY => "LOW"
 			)
 		port map (
