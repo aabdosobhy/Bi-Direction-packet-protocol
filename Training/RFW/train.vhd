@@ -437,10 +437,10 @@ begin
 			JCE2 => jce(2) );
 
 	process (s_clk)
-		begin 
-			if rising_edge(s_clk) and dec_8b = "11010110" then 
-				finish_training <= '0';
-			end if;
+	begin 
+		if rising_edge(s_clk) and dec_8b = "11010110" then 
+			finish_training <= '0';
+		end if;
 	end process;
 
     ce1_proc : process(e_clk, jrti(1))
