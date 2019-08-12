@@ -1,2 +1,15 @@
 create_clock -name {clk_50} -period 20.0 [get_ports {clk}]
 
+create_clock -name {jtck} -period 20.0 [get_pins {JTAGF_inst.JTCK}]
+
+create_clock -name {eclk_50} -period 20.0 [get_pins {clk_SYNC_INST.ECLKO}]
+
+
+
+create_clock -name {clk_12.5} -period 80.0 [get_pins {clkdiv_inst.CDIVX}]
+
+create_clock -name {des_clk_50} -period 20.0 [get_pins {deserilaizer_inst.e_clk}]
+create_clock -name {des_clk_12.5} -period 80.0 [get_pins {deserilaizer_inst.s_clk}]
+
+create_clock -name {PRNG_clk_50} -period 80.0 [get_pins {PRNG_Reg.clk}]
+

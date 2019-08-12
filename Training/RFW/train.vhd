@@ -38,7 +38,9 @@ entity train is
 	port(
 		clk : std_logic;
 		datain : in std_logic;		-- clock
-		rst : in std_logic
+		rst : in std_logic;
+		ec_0 : out std_logic;
+		jtdo_O : out std_logic
 		);
 end train;
 
@@ -464,7 +466,7 @@ begin
 					jreg <= jcnt;
 				end if;
 
-			-- elsif jupdate = '1' then
+			elsif jupdate = '1' then
 			-- 	led(7 downto 0) <= jreg(7 downto 0);
 			-- 	rst <= jreg(8);
 			elsif jrti(1) = '1' then	-- Run Test/Idle
@@ -481,5 +483,8 @@ begin
 
 	not_clk <= not e_clk;
 	rst_sys <= rst or v_rst;	
+
+	ec_0 <= BE_cnt(0);
+	jtdo_O <= jtdo(1);
 			
 end rtl;

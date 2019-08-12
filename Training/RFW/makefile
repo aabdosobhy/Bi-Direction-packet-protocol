@@ -2,7 +2,7 @@ BOARD="MachXO2"
 DEVICE="LCMXO2-1200HC"
 PKG="TQFP100"
 GRADE=4
-SEARCH="/usr/local/diamond/3.11_x64/ispfpga/vhdl/data/"
+SEARCH="/usr/local/diamond/3.10_x64/ispfpga/vhdl/data/"
 
 
 ALL:	train.bit
@@ -90,3 +90,37 @@ clean:
 	rm -rf synwork
 	rm -rf syntmp
 
+
+# BOARD="MachXO2"
+# DEVICE="LCMXO2-1200HC"
+# PKG="TQFP100"
+# GRADE=4
+# SEARCH="/usr/local/diamond/3.10_x64/ispfpga/vhdl/data/"
+
+# ALL:	train.bit
+
+# %.edi : $(SRC)%.vhd 
+# 	synpwrap -prj "$*.prj"
+
+# %.ngo : %.edi
+# 	edif2ngd -l $(BOARD) -d $(DEVICE) $< $@
+
+# %.ngd : %.ngo
+# 	ngdbuild -a $(BOARD) -d $(DEVICE) -p $(SEARCH) $< $@
+
+# %.ncd : %.ngd $(SRC)%.lpf
+# 	map -a $(BOARD) -p $(DEVICE) -t $(PKG) -s $(GRADE) $< -o $@ $*.lpf
+
+# %.o.ncd : %.ncd
+# 	par -w $< $*.o.ncd $*.prf
+
+# %.bit : %.o.ncd
+# 	bitgen -w $< $@
+
+# %.svf : %.bit
+# 	ddtcmd -oft -svfsingle -revd -op "SRAM Fast Program" -if $< -of $@
+
+# clean:
+# 	rm -rf 
+# 	rm -f stdout.log
+# 	rm -f synlog.tcl
