@@ -474,7 +474,7 @@ begin
 			else			-- Last TDI bit
 				jreg <= jtdi & jreg(127 downto 1);
 			end if; 
-		end if;
+		end if; 
     end process;
 
     jtdo(1) <= jreg(0);
