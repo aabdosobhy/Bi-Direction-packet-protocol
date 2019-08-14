@@ -144,8 +144,19 @@ architecture rtl of train is
 	component pll is
 		port (
 			CLKI: in  std_logic; 
-			CLKOP: out  std_logic);
-		end component;
+			CLKOP: out  std_logic; 
+			CLKOS: out  std_logic
+			);
+	end component;
+
+	component ECLKBRIDGECS
+		port (
+			CLK0: in std_logic;
+			CLK1 : in std_logic;
+			SEL : in std_logic;
+			ECSOUT : out std_logic
+			);
+	end component;
 
 	component PRNG is
 		Generic (
@@ -226,7 +237,7 @@ architecture rtl of train is
 	end component;
 
 	
-	signal clk_BUFF, clk_pll, d_clk, e_clk, s_clk  : std_logic;
+	signal clk_BUFF, clk_pll, clk_pll_feed, clk_50, d_clk, ECSOUT, e_clk, s_clk  : std_logic;
 	signal dqsdel : std_logic;
 	signal data_I_BUFF ,data_in_del : std_logic;
 	signal cDiv1_open : std_logic;
@@ -296,39 +307,62 @@ begin
 	-- 	Z => d_clk
 	-- 	);		
 
-	-- Inst_PLL : pll 
-	-- 	port map(
-	-- 		CLKI => clk_BUFF, 
-	-- 		CLKOP => clk_pll
-	-- 		);
+	Inst_PLL : pll 
+	 	port map(
+	 		CLKI => clk,
+			CLKOS => clk_pll_feed,
+			CLKOP => clk_50
+	 		);
 
-	Inst_DLLDELC : DLLDELC
-		port map (
-			CLKI   => clk,
-			DQSDEL => dqsdel,
-			CLKO   => d_clk
-			);
+	-- pll_Inst : entity work.EPLLB
+	-- 	generic map (			
+	-- 		FIN => "50.0",
+	-- 		FB_MODE => "CLOCKTREE"
+	-- 		)
+	-- 	port map (
+	-- 		CLKI => clk,
+	-- 		RST => rst,
+	-- 		CLKFB => clk_pll_feed,
+	-- 		CLKOP => clk_50
 
-	Inst_DQSDLLC : DQSDLLC
-		generic map (FORCE_MAX_DELAY => "NO",
-			FIN              => "50.0",
-			LOCK_SENSITIVITY => "LOW"
-			)
-		port map (
-			CLK      => e_clk,
-			RST      => rst,
-			UDDCNTLN => '0',
-			FREEZE   => '0',
-			LOCK     => dqsdllc_lock,
-			DQSDEL   => dqsdel
-			);
+	-- 	);
+
+	-- Inst_DLLDELC : DLLDELC
+	-- 	port map (
+	-- 		CLKI   => clk,
+	-- 		DQSDEL => dqsdel,
+	-- 		CLKO   => d_clk
+	-- 	);
+
+	-- Inst_DQSDLLC : DQSDLLC
+	-- 	generic map (
+	-- 		FORCE_MAX_DELAY => "NO",
+	-- 		FIN              => "50.0",
+	-- 		LOCK_SENSITIVITY => "LOW"
+	-- 		)
+	-- 	port map (
+	-- 		CLK      => e_clk,
+	-- 		RST      => rst,
+	-- 		UDDCNTLN => '0',
+	-- 		FREEZE   => '0',
+	-- 		LOCK     => dqsdllc_lock,
+	-- 		DQSDEL   => dqsdel
+	-- 	);
+
+	-- EdgeBrifge_Inst: ECLKBRIDGECS
+	-- 	port map (
+	-- 		CLK0 => clk_50,
+	-- 		CLK1 => '0',
+	-- 		SEL => '0',
+	-- 		ECSOUT => ECSOUT
+	-- 	);
 
 	clk_SYNC_INST: ECLKSYNCA
 		port map(
-			ECLKI => d_clk, --d_clk,
+			ECLKI => clk_50, --d_clk,
 			STOP  => '0',
 			ECLKO => e_clk
-			);
+		);
 
 	clkdiv_inst : CLKDIVC
 		generic map (
@@ -341,8 +375,8 @@ begin
 			CLKI    => e_clk,
 			CDIV1   => cDiv1_open,
 			CDIVX   => s_clk
-			);
-			   
+		);
+
 	deserilaizer_inst : deserializer 
 		port map (
 			e_clk => e_clk,
@@ -383,7 +417,7 @@ begin
 			LSin => PRNG_O,
 			LSout => PRNG_8b
 			);
-	
+
 	count_error : count_diff 
 		generic map(
 			CMP_SIZE => 8,
@@ -437,10 +471,10 @@ begin
 			JCE2 => jce(2) );
 
 	process (s_clk)
-	begin 
-		if rising_edge(s_clk) and dec_8b = "11010110" then 
-			finish_training <= '0';
-		end if;
+		begin 
+			if rising_edge(s_clk) and dec_8b = "11010110" then 
+				finish_training <= '0';
+			end if;
 	end process;
 
     ce1_proc : process(e_clk, jrti(1))
@@ -474,11 +508,11 @@ begin
 			else			-- Last TDI bit
 				jreg <= jtdi & jreg(127 downto 1);
 			end if; 
-		end if; 
+		end if;
     end process;
 
-    jtdo(1) <= jreg(0);
-	--jtdo(1) <= e_clk;
+    --jtdo(1) <= jreg(0);
+	jtdo(1) <= e_clk;
 	en_count <= en_PRNG and finish_training;
 
 	not_clk <= not e_clk;

@@ -80,15 +80,18 @@ clean:
 	rm -f *.areasrr *.ncd.asc
 	rm -f stdout.log.bak*
 	rm -f run_options.txt
+	rm -f _CMD_.CML
 	rm -f _cmd._cml
 	rm -f _CMD_COMPILER.CML
 	rm -rf backup
 	rm -rf dm
 	rm -rf coreip
 	rm -rf physical_plus
-	rm -rf synlog
+	rm -rf synlog*
 	rm -rf synwork
 	rm -rf syntmp
+	rm -rf scemi_cfg*
+	rm -rf .recordref
 
 
 # BOARD="MachXO2"

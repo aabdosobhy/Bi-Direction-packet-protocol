@@ -3,6 +3,7 @@
 add_file -vhdl -lib work "/usr/local/diamond/3.10_x64/cae_library/synthesis/vhdl/machxo2.vhd"
 #add_file -vhdl -lib work "/opt/diamond/3.5_x64/cae_library/synthesis/vhdl/machxo2.vhd"
 add_file -vhdl -lib work "8b10_dec.vhd"
+add_file -vhdl -lib work "pll.vhd"
 add_file -vhdl -lib work "count_diffs.vhd"
 add_file -vhdl -lib work "deserializer.vhd"
 add_file -vhdl -lib work "PRNG.vhd"
