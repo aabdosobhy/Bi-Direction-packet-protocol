@@ -11,7 +11,10 @@ ALL:	train.bit
 	@echo "### running synpwrap ..."
 	@synpwrap -prj train.prj >$*.synpwrap.out \
 	    || ( ./cc.sh srr $*.srr && false )
+	
 	@echo "--- premap"
+	@echo "--- compiler"
+	@ ./cc.sh srr synlog/$*_compiler.srr
 	@ ./cc.sh srr synlog/$*_premap.srr
 	@echo "--- fpga_mapper"
 	@ ./cc.sh srr synlog/$*_fpga_mapper.srr

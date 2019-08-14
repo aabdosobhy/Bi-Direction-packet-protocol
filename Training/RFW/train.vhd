@@ -519,6 +519,7 @@ begin
 	rst_sys <= rst or v_rst;	
 
 	ec_0 <= BE_cnt(0);
-	jtdo_O <= jtdo(1);
+	jtdo_O <= jreg(0);
+	--jtdo_O <= jtdo(1);
 			
 end rtl;
