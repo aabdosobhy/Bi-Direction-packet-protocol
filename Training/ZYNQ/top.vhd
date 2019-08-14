@@ -34,10 +34,11 @@ use unisim.VCOMPONENTS.ALL;
 entity top is
     port (
         clk : in std_logic;
+        clk_o : out std_logic;
         lvds_p : out std_logic;
         lvds_n : out std_logic;
-        clk_o_p : out std_logic;
-        clk_o_n : out std_logic;
+        rst_o_p : out std_logic;
+        rst_o_n : out std_logic;        
         i2c_scl : inout std_logic;	-- icsp clock
   	    i2c_sda : inout std_logic	-- icsp data
         );
@@ -54,8 +55,8 @@ architecture rtl of top is
             rst : in std_logic;
             lvds_p : out std_logic;
             lvds_n : out std_logic;
-            clk_o_p : out std_logic;
-            clk_o_n : out std_logic
+            rst_o_p : out std_logic;
+            rst_o_n : out std_logic
             );
     end component; 
 
@@ -107,6 +108,8 @@ begin
             I => ps_fclk(0),
             O => clk_100 
             );
+    
+
     -- div_led_inst : entity work.async_div
     --     generic map (
     --         STAGES => 28 )
@@ -124,8 +127,8 @@ begin
             rst => rst,                   
             lvds_p => lvds_p,
             lvds_n => lvds_n,
-            clk_o_p => clk_o_p, 
-            clk_o_n => clk_o_n
+            rst_o_p => rst_o_p, 
+            rst_o_n => rst_o_n
         );
 
         --------------------------------------------------------------------
@@ -160,6 +163,6 @@ begin
     PULLUP_scl_inst : PULLUP
         port map ( O => i2c_scl );
 
-	
+	clk_o <= clk_100;
 	rst <= ps_reset_n(0);
 end rtl;

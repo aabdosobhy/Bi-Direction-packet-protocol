@@ -39,8 +39,8 @@ entity train is
         rst : in std_logic;
         lvds_p : out std_logic;
         lvds_n : out std_logic;
-        clk_o_p : out std_logic;
-        clk_o_n : out std_logic
+        rst_o_p : out std_logic;
+        rst_o_n : out std_logic
         );
     end train; 
     
@@ -219,15 +219,15 @@ begin
             I => lvds_O
         );
 
-    lvds_clk_inst : OBUFDS
+    rst_inst : OBUFDS
         generic map (
             IOSTANDARD => "DEFAULT",
             SLEW => "SLOW"
             )
         port map (
-            O => clk_o_p,
-            OB => clk_o_n,
-            I => clk
+            O => rst_o_p,
+            OB => rst_o_n,
+            I => rst
         );        
 
     process(clk, rst)
