@@ -40,7 +40,8 @@ entity train is
 		datain : in std_logic;		-- clock
 		rst : in std_logic;
 		ec_0 : out std_logic;
-		jtdo_O : out std_logic
+		jtdo_O : out std_logic;
+		temp_test : out std_logic
 		);
 end train;
 
@@ -270,7 +271,7 @@ architecture rtl of train is
     signal jce : std_logic_vector(2 downto 1);
     signal jtdo : std_logic_vector(2 downto 1);
     signal jrti : std_logic_vector(2 downto 1);
-	
+	signal temp_wd_align : std_logic;
 begin
 
 	data_IB : IB
@@ -283,7 +284,7 @@ begin
 	delay_data : DELAYE
 		generic map (
 			DEL_VALUE => "DELAY0",
-			DEL_MODE  => "ECLK_ALIGNED"
+			DEL_MODE  => "ECLK_CENTERED"
 			)
 		port map (
 			A => data_I_BUFF,
@@ -509,10 +510,12 @@ begin
 				jreg <= jtdi & jreg(127 downto 1);
 			end if; 
 		end if;
-    end process;
+	end process;
 
-    --jtdo(1) <= jreg(0);
-	jtdo(1) <= e_clk;
+	temp_test <= word_align;
+
+    jtdo(1) <= jreg(0);
+	--jtdo(1) <= rst;
 	en_count <= en_PRNG and finish_training;
 
 	not_clk <= not e_clk;

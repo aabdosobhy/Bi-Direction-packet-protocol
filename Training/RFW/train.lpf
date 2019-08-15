@@ -16,3 +16,6 @@ LOCATE COMP "rst" SITE "39";
 #USE PRIMARY NET "e_clk";
 
 #USE SECONDARY NET "s_clk";
+
+LOCATE COMP "temp_test" SITE "47";
+

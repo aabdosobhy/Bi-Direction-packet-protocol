@@ -74,7 +74,6 @@ begin
         end if;
     end process;
 
-
     count_temp <= std_logic_vector(unsigned(count_diff_sig) + unsigned(difference));
     count_diff <= count_diff_sig;
 
