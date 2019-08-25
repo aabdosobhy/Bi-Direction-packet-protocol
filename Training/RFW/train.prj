@@ -15,7 +15,6 @@ add_file -vhdl -lib work "train.vhd"
 
 add_file -fpga_constraint "train.fdc"
 
-
 #implementation "count"
 impl -add count -type fpga
 
@@ -29,7 +28,7 @@ set_option -technology MACHXO2
 #set_option -part LFXP6C
 set_option -part LCMXO2_1200HC
 set_option -package TQFP100
-set_option -speed_grade -4
+set_option -speed_grade -6
 set_option -part_companion ""
 
 #compilation/mapping options
@@ -72,4 +71,3 @@ set_option -write_apr_constraint 1
 #set result format/file last
 project -result_file "./train.edi"
 impl -active "train_impl"
-

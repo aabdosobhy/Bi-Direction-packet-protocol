@@ -48,7 +48,7 @@ architecture rtl of train is
 
     signal word_alignment : std_logic_vector(7 downto 0) := "11110000";
     signal rst_word : std_logic_vector(7 downto 0) := "00000000";
-    signal clkfbout1, clk_20, clk_5, locked1 : std_logic;
+    signal clkfbout1, clk_50, clk_10, locked1 : std_logic;
     signal GND_sig : std_logic := '0';
     signal state : std_logic_vector(1 downto 0) := "00";
     signal shift_2bits : std_logic_vector(1 downto 0);
@@ -68,7 +68,7 @@ begin
     enc_8b_10b : entity work.enc_8b10b
         port map(
             RESET => rst,
-            SBYTECLK => clk_20,
+            SBYTECLK => clk_50,
             KI => GND_sig,
             AI => enc_8bit(0),
             BI => enc_8bit(1),
@@ -95,7 +95,7 @@ begin
             size => 5
             )
         port map(
-            clk => clk_20,
+            clk => clk_50,
             rst =>  rst_save,
             enb => '1',
             LSin => loop_cnt,
@@ -107,7 +107,7 @@ begin
             SEED => SEED
             )
         port map(
-            clk => clk_20,
+            clk => clk_50,
             rst => rst_save,
             enb => en_PRNG_shift,
             PRNG_O => PRNG_O
@@ -120,7 +120,7 @@ begin
             RST_VALUE => "11110000"
             )
         port map(
-            clk => clk_20,
+            clk => clk_50,
             rst =>  rst_save,
             enb => en_PRNG_shift,
             LSin => PRNG_O,
@@ -132,7 +132,7 @@ begin
             SIZE => 8
             )
         port map(
-            clk => clk_20,
+            clk => clk_50,
             enb => count1_falling,
             rst => rst_save,
             d => word_8b_I,
@@ -141,8 +141,8 @@ begin
 
     serdes: entity work.serializer 
         port map (
-            clk => clk_20,
-            clk_Div => clk_5,
+            clk => clk_50,
+            clk_Div => clk_10,
             rst => rst,
             Din => enc_10bit,
             serial_O => lvds_O
@@ -193,23 +193,24 @@ begin
             CLKFBOUT => clkfbout1,  -- General output feedback signal
             CLKFBIN  => clkfbout1,  -- Clock feedback input
             CLKIN1   => clk,    --pll0_clk,  -- Clock input
-            CLKOUT0  => clk_20,   -- One of six general clock output signals
-            CLKOUT1  => clk_5,  -- One of six general clock output signals
+            CLKOUT0  => clk_50,   -- One of six general clock output signals
+            CLKOUT1  => clk_10,  -- One of six general clock output signals
             LOCKED   => locked1,    -- Active high PLL lock signal
             PWRDWN   => '0',        -- Power Down PLL
             RST      => '0'         -- Asynchronous PLL reset
         );
-    process(clk_20, rst)
+    process(clk_50, rst)
 
         variable count_alignwd : integer range 0 to 42 := 0;        
     
     begin 
-        if rising_edge(clk_20) then 
+        if rising_edge(clk_50) then 
             if rst = '1' then 
                 rst_save <= '1';
 
             else 
                 rst_save <= '0';
+                
             end if;
 
             if rst_save = '0' then 
@@ -232,7 +233,7 @@ begin
             end if;
         end if;
 
-        if falling_edge(clk_20) then 
+        if falling_edge(clk_50) then 
             count1_falling <= count(1);
 
         end if;

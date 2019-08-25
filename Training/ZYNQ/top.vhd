@@ -45,7 +45,7 @@ end top;
 architecture rtl of top is    
 
     signal ps_fclk : std_logic_vector(3 downto 0);
-    signal clk_100 : std_logic;
+    signal clk_50 : std_logic;
     signal ps_reset_n : std_logic_vector(3 downto 0);
     signal rst : std_logic;
     --------------------------------------------------------------------
@@ -85,10 +85,10 @@ begin
             ps_reset_n => ps_reset_n
             );
 
-    BUFG_clk100_inst : BUFG
+    BUFG_clk50_inst : BUFG
         port map (
             I => ps_fclk(0),
-            O => clk_100 
+            O => clk_50 
             );
 
     train_inst : entity work.train 
@@ -96,7 +96,7 @@ begin
             SEED => "11100111"
             )
         port map(
-            clk => clk_100,
+            clk => clk_50,
             rst => rst,                   
             lvds_p => lvds_p,
             lvds_n => lvds_n,
@@ -136,7 +136,7 @@ begin
     PULLUP_scl_inst : PULLUP
         port map ( O => i2c_scl );
 
-    clk_o <= clk_100;
+    clk_o <= clk_50;
     rst <= ps_reset_n(0);
     
 end rtl;
