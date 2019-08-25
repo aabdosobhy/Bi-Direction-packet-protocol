@@ -230,7 +230,7 @@ begin
 
 			elsif jrti(1) = '1' then	-- Run Test/Idle
 
-			else			-- Last TDI bit
+			else						-- Last TDI bit
 				jreg <= jtdi & jreg(127 downto 1);
 			end if; 
 		end if;
