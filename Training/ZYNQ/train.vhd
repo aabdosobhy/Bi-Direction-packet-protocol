@@ -28,12 +28,12 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 library UNISIM;
-use UNISIM.VComponents.all;
+use UNISIM.vcomponents.all;
 
 entity train is
     Generic(
         SEED : std_logic_vector(7 downto 0) := "11100111"
-    );
+        );
     port (
         clk : in std_logic;
         rst : in std_logic;
@@ -42,72 +42,13 @@ entity train is
         rst_o_p : out std_logic;
         rst_o_n : out std_logic
         );
-    end train; 
+end train; 
     
 architecture rtl of train is    
-    component PRNG is
-        Generic (
-            SEED : std_logic_vector := "11100111"
-            );
-        port (
-            clk : in std_logic;
-            rst : in std_logic;
-            enb : in std_logic;
-            PRNG_O : out std_logic_vector (1 downto 0)
-            );
-    end component;
-    
-    component enc_8b10b is	
-        port(
-            RESET : in std_logic;		-- Global asynchronous reset (active high) 
-            SBYTECLK : in std_logic ;	-- Master synchronous send byte clock
-            KI : in std_logic ;			-- Control (K) input(active high)
-            AI, BI, CI, DI, EI, FI, GI, HI : in std_logic ;	-- Unencoded input data
-            JO, HO, GO, FO, IO, EO, DO, CO, BO, AO : out std_logic 	-- Encoded out 
-        );
-    end component;
-
-    component  serializer is
-        port (
-            clk : in std_logic;
-            clk_Div : std_logic;
-            rst : in std_logic;
-            Din : std_logic_vector(9 downto 0);
-            serial_O : out std_logic
-            );
-    end component; 
-
-    component sh_2b_rg is
-		generic(
-			SIZE : integer := 8;
-            SHIFT_BS : integer := 2;
-            RST_VALUE : std_logic_vector := "11110000"
-			);
-		port (
-			clk : in std_logic;
-			rst : in std_logic;
-			enb : in std_logic;
-			LSin : in std_logic_vector(SHIFT_BS -1 downto 0);
-			LSout : out std_logic_vector(SIZE -1 downto 0)
-			);
-	end component; 
-
-
-    component nRegister is
-        generic(
-            SIZE : integer := 8
-        );
-        port(
-            clk : in std_logic;		-- clock
-            enb : in std_logic;		-- enable write
-            rst : in std_logic;		-- reset
-            d : in std_logic_vector(SIZE -1 downto 0);	-- data to register
-            q : out std_logic_vector(SIZE -1 downto 0)	-- o/p data register
-        ); 
-    end component;
 
     signal word_alignment : std_logic_vector(7 downto 0) := "11110000";
     signal rst_word : std_logic_vector(7 downto 0) := "00000000";
+    signal clkfbout1, clk_20, clk_5, locked1 : std_logic;
     signal GND_sig : std_logic := '0';
     signal state : std_logic_vector(1 downto 0) := "00";
     signal shift_2bits : std_logic_vector(1 downto 0);
@@ -120,15 +61,14 @@ architecture rtl of train is
     signal loop_cnt : std_logic;
     signal PRNG_O : std_logic_vector(1 downto 0);
     Signal en_PRNG_shift, en_wdAlign_shift, en_shift_wd8b : std_logic;
-
     signal lvds_O : std_logic;
 
 begin
 
-    enc_8b_10b : enc_8b10b
+    enc_8b_10b : entity work.enc_8b10b
         port map(
             RESET => rst,
-            SBYTECLK => clk,
+            SBYTECLK => clk_20,
             KI => GND_sig,
             AI => enc_8bit(0),
             BI => enc_8bit(1),
@@ -155,60 +95,60 @@ begin
             size => 5
             )
         port map(
-            clk => clk,
+            clk => clk_20,
             rst =>  rst_save,
             enb => '1',
             LSin => loop_cnt,
             LSout => count
         );
 
-    PRNG_Reg : PRNG
+    PRNG_Reg : entity work.PRNG
         generic map (
             SEED => SEED
             )
         port map(
-            clk => clk,
+            clk => clk_20,
             rst => rst_save,
             enb => en_PRNG_shift,
             PRNG_O => PRNG_O
-            );
+        );
 
-    word_8b_Reg : sh_2b_rg
+    word_8b_Reg : entity work.sh_2b_rg
         generic map(
             SIZE => 8,
             SHIFT_BS => 2,
             RST_VALUE => "11110000"
             )
         port map(
-            clk => clk,
+            clk => clk_20,
             rst =>  rst_save,
             enb => en_PRNG_shift,
             LSin => PRNG_O,
             LSout => word_8b_I
         );
         
-    enc8b_save: nRegister
-            generic map(
-                SIZE => 8
-                )
-            port map(
-                clk => clk,
-                enb => count1_falling,
-                rst => rst_save,
-                d => word_8b_I,
-                q => word_8b_O
-            ); 
+    enc8b_save: entity work.nRegister
+        generic map(
+            SIZE => 8
+            )
+        port map(
+            clk => clk_20,
+            enb => count1_falling,
+            rst => rst_save,
+            d => word_8b_I,
+            q => word_8b_O
+        ); 
 
-    serdes: serializer 
+    serdes: entity work.serializer 
         port map (
-            clk => clk,
-            clk_Div => count(3),
+            clk => clk_20,
+            clk_Div => clk_5,
             rst => rst,
             Din => enc_10bit,
             serial_O => lvds_O
         );
 
-    lvds_inst : OBUFDS
+    data_inst : OBUFDS
         generic map (
             IOSTANDARD => "DEFAULT",
             SLEW => "SLOW"
@@ -230,23 +170,53 @@ begin
             I => rst
         );        
 
-    process(clk, rst)
+    PLL_BASE_inst1 : PLLE2_BASE
+        generic map (
+            CLKFBOUT_MULT  => 20,     -- Multiplication factor for all output clocks
+            CLKFBOUT_PHASE => 0.0,    -- Phase shift (degrees) of all output clocks
+            CLKIN1_PERIOD  => 20.000, -- Clock period (ns) of input clock on CLKIN
+
+            CLKOUT0_DIVIDE     => 20,  -- Division factor for CLKOUT0 (1 to 128)
+            CLKOUT0_DUTY_CYCLE => 0.5, -- Duty cycle for CLKOUT0 (0.01 to 0.99)
+            CLKOUT0_PHASE      => 0.0, -- Phase shift (degrees) for CLKOUT0 (0.0 to 360.0)
+
+            CLKOUT1_DIVIDE     => 100,   -- Division factor for CLKOUT1 (1 to 128)
+            CLKOUT1_DUTY_CYCLE => 0.5, -- Duty cycle for CLKOUT1 (0.01 to 0.99)
+            CLKOUT1_PHASE      => 0.0, -- Phase shift (degrees) for CLKOUT1 (0.0 to 360.0)
+
+            DIVCLK_DIVIDE => 1,           -- Division factor for all clocks (1 to 52)
+            BANDWIDTH     => "OPTIMIZED", -- "HIGH", "LOW" or "OPTIMIZED"
+            REF_JITTER1   => 0.0,       -- Input reference jitter (0.000 to 0.999 UI%)
+            STARTUP_WAIT  => "FALSE"
+            )
+        port map (
+            CLKFBOUT => clkfbout1,  -- General output feedback signal
+            CLKFBIN  => clkfbout1,  -- Clock feedback input
+            CLKIN1   => clk,    --pll0_clk,  -- Clock input
+            CLKOUT0  => clk_20,   -- One of six general clock output signals
+            CLKOUT1  => clk_5,  -- One of six general clock output signals
+            LOCKED   => locked1,    -- Active high PLL lock signal
+            PWRDWN   => '0',        -- Power Down PLL
+            RST      => '0'         -- Asynchronous PLL reset
+        );
+    process(clk_20, rst)
         variable count_alignwd : integer range 0 to 42 := 0;        
     begin 
-        if rising_edge(clk) then 
+        if rising_edge(clk_20) then 
             if rst = '1' then 
                 rst_save <= '1';
+
             else 
                 rst_save <= '0';
-
             end if;
 
             if rst_save = '0' then 
                 if count(0) = '1' and state(1) = '0' then
                     count_alignwd := count_alignwd +1;
-                    
+
                     if count_alignwd = 40 then
                         state <= "01";
+                        
                     elsif count_alignwd = 41 then
                         state <= "10";
                     end if;
@@ -257,7 +227,8 @@ begin
                 state <= "00";
             end if;
         end if;
-        if falling_edge(clk) then 
+
+        if falling_edge(clk_20) then 
             count1_falling <= count(1);
         end if;
     end process;
@@ -269,7 +240,7 @@ begin
     loop_cnt <= count(0);
 
     enc_8bit <= word_alignment when state = "00" else 
-        	rst_word when state = "01" else 
-         	word_8b_O;
+            rst_word when state = "01" else 
+            word_8b_O;
 
 end rtl;

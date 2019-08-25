@@ -62,10 +62,6 @@ begin
     feed2_1 <= lfsr(1) xor lfsr(3);
 	feed2_2 <= feed2_1 xor lfsr(4);
     feed2 <= feed2_2 xor lfsr(6);
-
-
     PRNG_O <= lfsr(1 downto 0);
 
 end PRNG7542;
-
-

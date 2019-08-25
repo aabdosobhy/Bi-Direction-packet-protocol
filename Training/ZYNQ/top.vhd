@@ -30,35 +30,19 @@ use ieee.std_logic_1164.all;
 library unisim;
 use unisim.VCOMPONENTS.ALL;
 
-
 entity top is
     port (
-        clk : in std_logic;
         clk_o : out std_logic;
         lvds_p : out std_logic;
         lvds_n : out std_logic;
         rst_o_p : out std_logic;
         rst_o_n : out std_logic;        
         i2c_scl : inout std_logic;	-- icsp clock
-  	    i2c_sda : inout std_logic	-- icsp data
+        i2c_sda : inout std_logic	-- icsp data
         );
-    end top; 
+end top; 
     
 architecture rtl of top is    
-
-    component train is
-        Generic(
-            SEED : std_logic_vector(7 downto 0) := "11100111"
-            );
-        port (
-            clk : in std_logic;
-            rst : in std_logic;
-            lvds_p : out std_logic;
-            lvds_n : out std_logic;
-            rst_o_p : out std_logic;
-            rst_o_n : out std_logic
-            );
-    end component; 
 
     signal ps_fclk : std_logic_vector(3 downto 0);
     signal clk_100 : std_logic;
@@ -108,17 +92,8 @@ begin
             I => ps_fclk(0),
             O => clk_100 
             );
-    
 
-    -- div_led_inst : entity work.async_div
-    --     generic map (
-    --         STAGES => 28 )
-    --     port map (
-    --         clk_in => ps_fclk(0),
-    --         clk_out => clk_100 
-    --     );
-
-    train_inst : train 
+    train_inst : entity work.train 
         generic map (
             SEED => "11100111"
             )

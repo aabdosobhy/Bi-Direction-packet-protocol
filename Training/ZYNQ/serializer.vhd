@@ -31,9 +31,9 @@ use UNISIM.VComponents.all;
 entity serializer is
     port (
         clk : in std_logic;
-        clk_Div : std_logic;
+        clk_Div : in std_logic;
         rst : in std_logic;
-        Din : std_logic_vector(9 downto 0);
+        Din : in std_logic_vector(9 downto 0);
         serial_O : out std_logic
         );
     end serializer; 

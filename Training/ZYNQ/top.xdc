@@ -1,10 +1,5 @@
 create_clock -period 20.000 -name sysClk -waveform {0.000 10.000} [get_pins */PS7_inst/FCLKCLK[0]]
 
-#set_property PACKAGE_PIN T14 [get_ports  {clk}]
-
-#set_property PACKAGE_PIN V5 [get_ports  "rst"] 
-
-
 set_property PACKAGE_PIN R19 [get_ports  {clk_o}] 
 # RFW 
 #set_property PACKAGE_PIN T9 [get_ports  "lvds_p"]
