@@ -41,7 +41,7 @@ entity sh_rg is
         LSin : in std_logic;
         LSout : out std_logic_vector(SIZE -1 downto 0)
     );
-    end sh_rg; 
+end sh_rg; 
     
 architecture sh_rg_A of sh_rg is
 
@@ -63,15 +63,17 @@ begin
     
     process (clk)
     begin      
-	if rst = '1' then 
-		sh_rg_I <= (others => '0');
+        if rst = '1' then 
+            sh_rg_I <= (others => '0');
 
         elsif rising_edge(clk) and enb = '1' then 
-                sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
-            end if;
-        
+            sh_rg_I <= LSin & Sh_rg_O(7 downto 1);
+
+        end if;
     end process;
+
     LSout <= Sh_rg_O;
+
 end sh_rg_A;
 
 architecture sh_Count of sh_rg is
@@ -94,12 +96,15 @@ begin
     process (clk, rst)
     begin
         
-	if rst ='1' then 
-		sh_rg_I <= (SIZE -1 => '1' , others => '0');
+        if rst ='1' then 
+            sh_rg_I <= (SIZE -1 => '1' , others => '0');
+
         elsif rising_edge(clk)  and enb = '1' then 
-                sh_rg_I <= LSin & Sh_rg_O(SIZE -1 downto 1);
-            end if;
-        
+            sh_rg_I <= LSin & Sh_rg_O(SIZE -1 downto 1);
+
+        end if;        
     end process;
+
     LSout <= Sh_rg_O;
+
 end sh_Count;

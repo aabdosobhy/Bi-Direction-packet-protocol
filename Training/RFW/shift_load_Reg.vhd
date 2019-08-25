@@ -40,7 +40,7 @@ entity sh_ld_rg is
         load : in std_logic_vector(SIZE -1 downto 0);
         LSout : out std_logic
     );
-    end sh_ld_rg; 
+end sh_ld_rg; 
 
 
 architecture rtl of sh_ld_rg is
@@ -53,17 +53,21 @@ begin
     process (clk, rst)
     begin
         
-	if rst ='1' then 
-		sh_rg <= (others => '0');
-    elsif rising_edge(clk) then 
-        if enb = '1' then 
-            sh_rg <= Sh_rg_O(0) & Sh_rg_O(SIZE -1 downto 1);
-        else 
-            sh_rg <= load;
+        if rst ='1' then 
+            sh_rg <= (others => '0');
+            
+        elsif rising_edge(clk) then 
+            if enb = '1' then 
+                sh_rg <= Sh_rg_O(0) & Sh_rg_O(SIZE -1 downto 1);
+
+            else 
+                sh_rg <= load;
+
+            end if;
         end if;
-    end if;
         
     end process;
     Sh_rg_O <= sh_rg;
     LSout <= Sh_rg(0);
+    
 end rtl;

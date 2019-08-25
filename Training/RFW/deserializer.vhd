@@ -136,13 +136,13 @@ begin
             end if;	
             
             if falling_edge(s_clk) then 
-				if decoderOut = "00000000" and setup_en = '1' and rst = '0' then 					
-						v_rst_sig <= '1';
-                        setup_en <= '0';   
-                        
-				end if;               
+                if decoderOut = "00000000" and setup_en = '1' and rst = '0' then 					
+                    v_rst_sig <= '1';
+                    setup_en <= '0';   
+
+                end if;               
             end if;
-        
+
         else
             state <= "000";
 

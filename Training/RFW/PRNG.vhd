@@ -51,16 +51,19 @@ begin
     begin
         if rst = '1' then
             lfsr <= SEED;
+
         elsif rst = '0' and rising_edge(clk) and enb = '1' then
             lfsr <= feed2 & feed1 & lfsr(7 downto 2);
+
         end if;
     end process;
-	feed1_1 <= lfsr(0) xor lfsr(2);
-	feed1_2 <= feed1_1 xor lfsr(3);
+
+    feed1_1 <= lfsr(0) xor lfsr(2);
+    feed1_2 <= feed1_1 xor lfsr(3);
     feed1 <= feed1_2 xor lfsr(5);
 
     feed2_1 <= lfsr(1) xor lfsr(3);
-	feed2_2 <= feed2_1 xor lfsr(4);
+    feed2_2 <= feed2_1 xor lfsr(4);
     feed2 <= feed2_2 xor lfsr(6);
     PRNG_O <= lfsr(1 downto 0);
 

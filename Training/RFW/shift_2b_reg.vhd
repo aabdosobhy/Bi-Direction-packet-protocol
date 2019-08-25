@@ -39,21 +39,25 @@ entity sh_2b_rg is
         LSin : in std_logic_vector(SHIFT_BS -1 downto 0);
         LSout : out std_logic_vector(SIZE -1 downto 0)
     );
-    end sh_2b_rg; 
+end sh_2b_rg; 
     
 architecture rtl of sh_2b_rg is
 
     signal sh_rg : std_logic_vector(SIZE -1 downto 0);
+
 begin
 
     process (clk, rst)
     begin    
-	    if rst = '1' then 
-                sh_rg <= "01110000";   
-        elsif rising_edge(clk) and enb = '1' then 
-                sh_rg <= LSin & Sh_rg(SIZE -1 downto SHIFT_BS );
-            end if;
+        if rst = '1' then 
+            sh_rg <= "01110000"; 
 
+        elsif rising_edge(clk) and enb = '1' then 
+            sh_rg <= LSin & Sh_rg(SIZE -1 downto SHIFT_BS );
+
+        end if;
     end process;
+
     LSout <= Sh_rg;
+
 end rtl;

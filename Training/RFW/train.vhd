@@ -42,7 +42,7 @@ entity train is
 		ec_0 : out std_logic;
 		jtdo_O : out std_logic;
 		temp_test : out std_logic
-		);
+	);
 end train;
 
 architecture rtl of train is
@@ -62,20 +62,16 @@ architecture rtl of train is
 	signal PRNG_8b : std_logic_vector(7 downto 0);	
 	signal dqsdllc_lock : std_logic;
 	signal BE_cnt: std_logic_vector(127 downto 0);
-	
 	signal jcnt : std_logic_vector(127 downto 0);
-    signal jreg : std_logic_vector(127 downto 0);
-
-    signal jtdi : std_logic;
-    signal jtck : std_logic;
-
-    signal jshift : std_logic;
-    signal jrstn : std_logic;
-    signal jupdate : std_logic;
-
-    signal jce : std_logic_vector(2 downto 1);
-    signal jtdo : std_logic_vector(2 downto 1);
-    signal jrti : std_logic_vector(2 downto 1);
+	signal jreg : std_logic_vector(127 downto 0);
+	signal jtdi : std_logic;
+	signal jtck : std_logic;
+	signal jshift : std_logic;
+	signal jrstn : std_logic;
+	signal jupdate : std_logic;
+	signal jce : std_logic_vector(2 downto 1);
+	signal jtdo : std_logic_vector(2 downto 1);
+	signal jrti : std_logic_vector(2 downto 1);
 	signal temp_wd_align : std_logic;
 begin
 
@@ -97,18 +93,18 @@ begin
 			);
 
 	Inst_PLL : entity work.pll 
-	 	port map(
-	 		CLKI => clk,
+		port map(
+			CLKI => clk,
 			CLKOS => clk_pll_feed,
 			CLKOP => clk_50
-	 		);
+			);
 
 	clk_SYNC_INST: entity work.ECLKSYNCA
 		port map(
 			ECLKI => clk_50,
 			STOP  => '0',
 			ECLKO => e_clk
-		);
+			);
 
 	clkdiv_inst : entity work.CLKDIVC
 		generic map (
@@ -121,7 +117,7 @@ begin
 			CLKI    => e_clk,
 			CDIV1   => cDiv1_open,
 			CDIVX   => s_clk
-		);
+			);
 
 	deserilaizer_inst : entity work.deserializer 
 		port map (
@@ -133,7 +129,7 @@ begin
 			word_align => word_align,
 			v_rst => v_rst,
 			en_PRNG => en_PRNG
-		);
+			);
 
 	PRNG_Reg : entity work.PRNG
 		generic map (
@@ -171,13 +167,13 @@ begin
 			A => PRNG_8b,
 			B => dec_8b,
 			count_diff => BE_cnt
-		);
+			);
 
-    JTAGF_inst: entity work.JTAGF
+	JTAGF_inst: entity work.JTAGF
 		generic map (
 			ER1 => "ENABLED",
 			ER2 => "ENABLED" )
-		port map (
+			port map (
 			TCK => '0',
 			TMS => '0',
 			TDI => '0',
@@ -197,27 +193,29 @@ begin
 			JTDO2 => jtdo(2),
 			--
 			JCE1 => jce(1),
-			JCE2 => jce(2) );
+			JCE2 => jce(2) 
+			);
 
 	process (s_clk)
 		begin 
 			if rising_edge(s_clk) and dec_8b = "11010110" then 
 				finish_training <= '0';
-			end if;
-	end process;
 
-    ce1_proc : process(e_clk, jrti(1))
+			end if;
+		end process;
+
+	ce1_proc : process(e_clk, jrti(1))
 		variable jce_v : std_logic := '0';
-    begin
+	begin
 		if rising_edge(e_clk) then			
 			if jrti(1) = '1' then
 				jcnt <= BE_cnt;
 			end if;
 		end if;
-    end process;
+	end process;
 
-    er1_proc : process(jtck, jce(1))
-    begin
+	er1_proc : process(jtck, jce(1))
+	begin
 		if falling_edge(jtck) then
 			if jrstn = '0' then			-- Test Logic Reset
 
@@ -227,8 +225,8 @@ begin
 
 				else					-- Capture DR
 					jreg <= jcnt;
-				end if;
 
+				end if;
 			elsif jupdate = '1' then	-- update data
 
 			elsif jrti(1) = '1' then	-- Run Test/Idle
@@ -241,7 +239,7 @@ begin
 
 	temp_test <= word_align;
 
-    jtdo(1) <= jreg(0);
+	jtdo(1) <= jreg(0);
 	en_count <= en_PRNG and finish_training;
 
 	not_clk <= not e_clk;
