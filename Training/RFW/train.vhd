@@ -81,7 +81,6 @@ begin
 			O => data_I_BUFF
 			);
 
-
 	delay_data : entity work.DELAYE
 		generic map (
 			DEL_VALUE => "DELAY0",

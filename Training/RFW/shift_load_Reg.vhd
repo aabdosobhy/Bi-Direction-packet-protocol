@@ -27,7 +27,7 @@
 ----------------------------------------------------------------------------------
 
 library ieee;
-    use ieee.std_logic_1164.all;
+use ieee.std_logic_1164.all;
 
 entity sh_ld_rg is
     generic(
@@ -67,6 +67,7 @@ begin
         end if;
         
     end process;
+    
     Sh_rg_O <= sh_rg;
     LSout <= Sh_rg(0);
     

@@ -6,10 +6,8 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
--- synopsys translate_off
 library MACHXO2;
 use MACHXO2.components.all;
--- synopsys translate_on
 
 entity pll is
     port (
