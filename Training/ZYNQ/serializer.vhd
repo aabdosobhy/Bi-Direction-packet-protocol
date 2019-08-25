@@ -36,7 +36,7 @@ entity serializer is
         Din : in std_logic_vector(9 downto 0);
         serial_O : out std_logic
         );
-    end serializer; 
+end serializer; 
     
 architecture rtl of serializer is
 

@@ -200,7 +200,9 @@ begin
             RST      => '0'         -- Asynchronous PLL reset
         );
     process(clk_20, rst)
+
         variable count_alignwd : integer range 0 to 42 := 0;        
+    
     begin 
         if rising_edge(clk_20) then 
             if rst = '1' then 
@@ -219,26 +221,26 @@ begin
                         
                     elsif count_alignwd = 41 then
                         state <= "10";
+
                     end if;
                 end if;
 
             else 
                 count_alignwd := 0;
                 state <= "00";
+
             end if;
         end if;
 
         if falling_edge(clk_20) then 
             count1_falling <= count(1);
+
         end if;
     end process;
 
     en_shift_wd8b <= not count(0);
-
     en_PRNG_shift <= en_shift_wd8b and  state(1);
-
     loop_cnt <= count(0);
-
     enc_8bit <= word_alignment when state = "00" else 
             rst_word when state = "01" else 
             word_8b_O;

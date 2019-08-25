@@ -41,6 +41,7 @@ end sh_rg;
 architecture sh_rg_A of sh_rg is
 
     signal sh_rg : std_logic_vector(SIZE -1 downto 0);
+
 begin
 
     process (clk)
@@ -57,11 +58,13 @@ begin
     end process;
 
     LSout <= Sh_rg;
+    
 end sh_rg_A;
 
 architecture sh_Count of sh_rg is
     
     signal sh_rg_C : std_logic_vector(SIZE -1 downto 0);
+
 begin
     
     process (clk)
@@ -80,4 +83,5 @@ begin
     end process;
     
     LSout <= sh_rg_C;
+
 end sh_Count;

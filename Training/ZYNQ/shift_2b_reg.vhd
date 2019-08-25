@@ -19,6 +19,7 @@ end sh_2b_rg;
 architecture rtl of sh_2b_rg is
 
     signal sh_rg : std_logic_vector(SIZE -1 downto 0);
+
 begin
 
     process (clk, rst)
@@ -33,4 +34,5 @@ begin
     end process;
 
     LSout <= Sh_rg;
+    
 end rtl;

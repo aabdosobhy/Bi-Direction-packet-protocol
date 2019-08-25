@@ -46,8 +46,8 @@ architecture rtl of top is
 
     signal ps_fclk : std_logic_vector(3 downto 0);
     signal clk_100 : std_logic;
-	signal ps_reset_n : std_logic_vector(3 downto 0);
-	signal rst : std_logic;
+    signal ps_reset_n : std_logic_vector(3 downto 0);
+    signal rst : std_logic;
     --------------------------------------------------------------------
     -- I2C Signals
     --------------------------------------------------------------------
@@ -70,8 +70,6 @@ architecture rtl of top is
     signal i2c1_scl_t : std_logic;
     signal i2c1_scl_t_n : std_logic;
 
-
-
 begin
 
     ps7_stub_inst : entity work.ps7_stub
@@ -84,8 +82,8 @@ begin
             i2c1_scl_i => i2c1_scl_i,
             i2c1_scl_o => i2c1_scl_o,
             i2c1_scl_t_n => i2c1_scl_t_n,
-			ps_reset_n => ps_reset_n
-        );
+            ps_reset_n => ps_reset_n
+            );
 
     BUFG_clk100_inst : BUFG
         port map (
@@ -104,7 +102,7 @@ begin
             lvds_n => lvds_n,
             rst_o_p => rst_o_p, 
             rst_o_n => rst_o_n
-        );
+            );
 
         --------------------------------------------------------------------
     -- I2C Interface
@@ -117,9 +115,9 @@ begin
     i2c1_sda_t <= not i2c1_sda_t_n;
 
     IOBUF_sda_inst : IOBUF
-	port map (
-	    I => i2c_sda_o, O => i2c_sda_i,
-	    T => i2c_sda_t, IO => i2c_sda );
+        port map (
+            I => i2c_sda_o, O => i2c_sda_i,
+            T => i2c_sda_t, IO => i2c_sda );
 
     PULLUP_sda_inst : PULLUP
         port map ( O => i2c_sda );
@@ -131,13 +129,14 @@ begin
     i2c1_scl_t <= not i2c1_scl_t_n;
 
     IOBUF_scl_inst : IOBUF
-	port map (
-	    I => i2c_scl_o, O => i2c_scl_i,
-	    T => i2c_scl_t, IO => i2c_scl );
+        port map (
+            I => i2c_scl_o, O => i2c_scl_i,
+            T => i2c_scl_t, IO => i2c_scl );
 
     PULLUP_scl_inst : PULLUP
         port map ( O => i2c_scl );
 
-	clk_o <= clk_100;
-	rst <= ps_reset_n(0);
+    clk_o <= clk_100;
+    rst <= ps_reset_n(0);
+    
 end rtl;
