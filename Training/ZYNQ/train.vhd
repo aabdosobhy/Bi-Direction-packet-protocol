@@ -145,7 +145,7 @@ begin
             clk_Div => clk_10,
             rst => rst,
             Din => enc_10bit,
-            ser_data_O => sed_data_O
+            ser_data_O => ser_data_O
         );
 
     ser_data_inst : OBUFDS

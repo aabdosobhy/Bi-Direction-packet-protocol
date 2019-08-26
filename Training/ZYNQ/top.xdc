@@ -2,18 +2,18 @@ create_clock -period 20.000 -name sysClk -waveform {0.000 10.000} [get_pins */PS
 
 set_property PACKAGE_PIN R19 [get_ports  {clk_o}] 
 # RFW 
-#set_property PACKAGE_PIN T9 [get_ports  "lvds_p"]
-#set_property PACKAGE_PIN U10 [get_ports  "lvds_n"]
+#set_property PACKAGE_PIN T9 [get_ports  "ser_data_O_p"]
+#set_property PACKAGE_PIN U10 [get_ports  "ser_data_O_n"]
 
 # RFE
-set_property PACKAGE_PIN P14 [get_ports  {lvds_p}]
-set_property PACKAGE_PIN R14 [get_ports  {lvds_n}]
+set_property PACKAGE_PIN P14 [get_ports  {ser_data_O_p}]
+set_property PACKAGE_PIN R14 [get_ports  {ser_data_O_n}]
 set_property PACKAGE_PIN E18 [get_ports  {rst_o_p}]
 set_property PACKAGE_PIN E19 [get_ports  {rst_o_n}]
 
 #set_property IOSTANDARD LVCMOS18 [get_ports {clk}]
 set_property IOSTANDARD LVCMOS25 [get_ports {clk_o}]
-set_property IOSTANDARD LVDS_25  [get_ports {lvds_*}]
+set_property IOSTANDARD LVDS_25  [get_ports {ser_data_O_*}]
 set_property IOSTANDARD LVDS_25  [get_ports {rst_o_*}]
 
 

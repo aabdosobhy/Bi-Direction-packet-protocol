@@ -10,10 +10,12 @@ cd build.vivado
 
 create_project Train_ZYNQ [pwd]
 
-read_vhdl -vhdl2008 ../../library/register.vhd
-read_vhdl -vhdl2008 ../../library/shift_2b_reg.vhd
+read_vhdl -vhdl2008 ../library/register.vhd
+read_vhdl -vhdl2008 ../library/shift_2b_reg.vhd
+read_vhdl -vhdl2008 ../shift_reg.vhd
 read_vhdl -vhdl2008 ../8b10_enc.vhd
 read_vhdl -vhdl2008 ../PRNG.vhd
+read_vhdl -vhdl2008 ../vivado_pkg.vhd
 read_vhdl -vhdl2008 ../serializer.vhd
 read_vhdl -vhdl2008 ../ps7_stub.vhd
 read_vhdl -vhdl2008 ../train.vhd
