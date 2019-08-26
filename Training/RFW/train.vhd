@@ -7,7 +7,7 @@
 -- Module Name:    train.
 -- Target Devices: LCMXO2-1200HC
 -- Package name:   TQFP100
--- grade: 		   4
+-- grade: 		   6
 -- Tool versions:  Lattice Diamond
 -- Description:	   Receive the bits and compare them to the PRNG result and calculate BER.
 --
@@ -29,7 +29,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library machxo2;
-use machxo2.all;
+use machxo2.components.all;
 
 entity train is
 	Generic(
@@ -75,13 +75,13 @@ architecture rtl of train is
 	signal temp_wd_align : std_logic;
 begin
 
-	data_IB : entity work.IB
+	data_IB : IB
 		port map(
 			I => datain,
 			O => data_I_BUFF
 			);
 
-	delay_data : entity work.DELAYE
+	delay_data : DELAYE
 		generic map (
 			DEL_VALUE => "DELAY0",
 			DEL_MODE  => "ECLK_CENTERED"
@@ -91,21 +91,21 @@ begin
 			Z => data_in_del
 			);
 
-	Inst_PLL : entity work.pll 
+	Inst_PLL : entity pll 
 		port map(
 			CLKI => clk,
 			CLKOS => clk_pll_feed,
 			CLKOP => clk_50
 			);
 
-	clk_SYNC_INST: entity work.ECLKSYNCA
+	clk_SYNC_INST: ECLKSYNCA
 		port map(
 			ECLKI => clk_50,
 			STOP  => '0',
 			ECLKO => e_clk
 			);
 
-	clkdiv_inst : entity work.CLKDIVC
+	clkdiv_inst : CLKDIVC
 		generic map (
 			DIV => "4.0",
 			GSR => "ENABLED"
@@ -118,7 +118,7 @@ begin
 			CDIVX   => s_clk
 			);
 
-	deserilaizer_inst : entity work.deserializer 
+	deserilaizer_inst : entity deserializer 
 		port map (
 			e_clk => e_clk,
 			s_clk => s_clk,			
@@ -130,7 +130,7 @@ begin
 			en_PRNG => en_PRNG
 			);
 
-	PRNG_Reg : entity work.PRNG
+	PRNG_Reg : entity PRNG
 		generic map (
 			SEED => SEED
 			)
@@ -141,10 +141,11 @@ begin
 			PRNG_O => PRNG_O
 			);
 
-	word_8b_r : entity work.sh_2b_rg 
+	word_8b_r : entity sh_2b_rg 
 		generic map(
 			SIZE => 8,
-			SHIFT_BS => 2
+			SHIFT_BS => 2,
+			RST_VALUE => "01110000"
 			)
 		port map(
 			clk => not_clk,
@@ -154,7 +155,7 @@ begin
 			LSout => PRNG_8b
 			);
 
-	count_error : entity work.count_diff 
+	count_error : entity count_diff 
 		generic map(
 			CMP_SIZE => 8,
 			OUT_SIZE => 128
@@ -168,7 +169,7 @@ begin
 			count_diff => BE_cnt
 			);
 
-	JTAGF_inst: entity work.JTAGF
+	JTAGF_inst: JTAGF
 		generic map (
 			ER1 => "ENABLED",
 			ER2 => "ENABLED" )

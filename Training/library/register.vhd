@@ -5,8 +5,6 @@
 -- Create Date:    28/6/2019 
 -- Design Name:    register 
 -- Module Name:    nRegister   
--- Target Devices: Zynq-7000  xc7z020clg400-1
--- Tool versions:  xilinx vivado
 -- Description:    generic Register 
 --
 -- Dependencies: 

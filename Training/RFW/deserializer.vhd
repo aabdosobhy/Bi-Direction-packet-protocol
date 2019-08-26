@@ -7,7 +7,7 @@
 -- Module Name:    deserializer  
 -- Target Devices: LCMXO2-1200HC
 -- Package name:   TQFP100
--- grade: 		   4
+-- grade: 		   6
 -- Tool versions:  Lattice Diamond
 -- Description:    receive the inoput serial bit and generate a 4 words of 10 bits every 5 s_clk 
 --                 cycles and decode every word by the falling edge of sclk to be the decoded 
@@ -32,7 +32,7 @@ use ieee.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
 
 LIBRARY machxo2;
-USE machxo2.all;
+USE machxo2.components.all;
 
 entity deserializer is
     port (
@@ -63,7 +63,7 @@ architecture rtl of deserializer is
 
 begin 
 
-    deserializer : entity work.IDDRX4B
+    deserializer : IDDRX4B
         generic map (
             GSR => "ENABLED"
         )
@@ -83,7 +83,7 @@ begin
             q7      => pdata2mux(0)
         );
 
-    decoder_10b_8b : entity work.dec_8b10b
+    decoder_10b_8b : entity dec_8b10b
         port map (
             RESET    => gnd,
             RBYTECLK => e_clk,

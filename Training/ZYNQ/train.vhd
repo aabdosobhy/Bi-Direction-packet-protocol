@@ -37,8 +37,8 @@ entity train is
     port (
         clk : in std_logic;
         rst : in std_logic;
-        lvds_p : out std_logic;
-        lvds_n : out std_logic;
+        ser_data_p : out std_logic;
+        ser_data_n : out std_logic;
         rst_o_p : out std_logic;
         rst_o_n : out std_logic
         );
@@ -61,7 +61,7 @@ architecture rtl of train is
     signal loop_cnt : std_logic;
     signal PRNG_O : std_logic_vector(1 downto 0);
     Signal en_PRNG_shift, en_wdAlign_shift, en_shift_wd8b : std_logic;
-    signal lvds_O : std_logic;
+    signal ser_data_O : std_logic;
 
 begin
 
@@ -145,18 +145,18 @@ begin
             clk_Div => clk_10,
             rst => rst,
             Din => enc_10bit,
-            serial_O => lvds_O
+            ser_data_O => sed_data_O
         );
 
-    data_inst : OBUFDS
+    ser_data_inst : OBUFDS
         generic map (
             IOSTANDARD => "DEFAULT",
             SLEW => "SLOW"
             )
         port map (
-            O => lvds_p,
-            OB => lvds_n,
-            I => lvds_O
+            O => ser_data_p,
+            OB => ser_data_n,
+            I => ser_data_O
         );
 
     rst_inst : OBUFDS

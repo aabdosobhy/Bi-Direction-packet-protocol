@@ -10,17 +10,14 @@ cd build.vivado
 
 create_project Train_ZYNQ [pwd]
 
-read_vhdl -vhdl2008 ../register.vhd
-read_vhdl -vhdl2008 ../Shift_reg.vhd
-read_vhdl -vhdl2008 ../shift_2b_reg.vhd
+read_vhdl -vhdl2008 ../../library/register.vhd
+read_vhdl -vhdl2008 ../../library/shift_2b_reg.vhd
 read_vhdl -vhdl2008 ../8b10_enc.vhd
 read_vhdl -vhdl2008 ../PRNG.vhd
 read_vhdl -vhdl2008 ../serializer.vhd
-read_vhdl -vhdl2008 ../vivado_pkg.vhd
 read_vhdl -vhdl2008 ../ps7_stub.vhd
 read_vhdl -vhdl2008 ../train.vhd
 read_vhdl -vhdl2008 ../top.vhd
-
 read_xdc ../top.xdc
 
 set_property PART xc7z020clg400-1 [current_project]

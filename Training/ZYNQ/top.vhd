@@ -33,8 +33,8 @@ use unisim.VCOMPONENTS.ALL;
 entity top is
     port (
         clk_o : out std_logic;
-        lvds_p : out std_logic;
-        lvds_n : out std_logic;
+        ser_data_O_p : out std_logic;
+        ser_data_O_n : out std_logic;
         rst_o_p : out std_logic;
         rst_o_n : out std_logic;        
         i2c_scl : inout std_logic;	-- icsp clock
@@ -98,8 +98,8 @@ begin
         port map(
             clk => clk_50,
             rst => rst,                   
-            lvds_p => lvds_p,
-            lvds_n => lvds_n,
+            ser_data_p => ser_data_O_p,
+            ser_data_n => ser_data_O_n,
             rst_o_p => rst_o_p, 
             rst_o_n => rst_o_n
             );

@@ -34,7 +34,7 @@ entity serializer is
         clk_Div : in std_logic;
         rst : in std_logic;
         Din : in std_logic_vector(9 downto 0);
-        serial_O : out std_logic
+        ser_data_O : out std_logic
         );
 end serializer; 
     
@@ -61,7 +61,7 @@ begin
             ) 
         port map (
             OFB => open, -- 1-bit output: Feedback path for data 
-            OQ => serial_O, -- 1-bit output: Data path output 
+            OQ => ser_data_O, -- 1-bit output: Data path output 
             -- SHIFTOUT1 / SHIFTOUT2: 1-bit (each) output: Data output expansion (1-bit each) 
             SHIFTOUT1 => open, 
             SHIFTOUT2 => open, 
