@@ -11,7 +11,7 @@ Bidirectional Packet Protocol for FPGA(Field Programmable Logic Array) communica
 The report can be found in the repo files at the root directory.
 
 # Special Thanks
-Special thanks to Bertl my mentor, he helped me improve myself. I may not have finished all my tasks but I did my best to be on track. I learned a lot of lessons and I will work on improving my knowledge and skill set. I won't stop contributing to Apertus organization.
+Special thanks to Bertl my mentor, he helped me improve myself. I learned a lot of lessons and I will work on improving my knowledge and skill set. I won't stop contributing to Apertus organization.
 
 
 # Future Work
